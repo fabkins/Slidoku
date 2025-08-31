@@ -148,7 +148,7 @@ class SlidokuGame {
 
     generateBoard() {
         console.log('Generating board...');
-        // Base 4x4 magic square (rows/cols sum = 34)
+        // Base 4x4 magic square (rows/cols sum = 30 with 0–15)
         let magicSquare = [
             [15, 1, 2, 12],
             [4, 10, 9, 7],
@@ -178,6 +178,22 @@ class SlidokuGame {
         }
         if (Math.random() < 0.5) {
             magicSquare = reflectH(magicSquare);
+        }
+
+        // Random row swaps (within pairs)
+        if (Math.random() < 0.5) [magicSquare[0], magicSquare[1]] = [magicSquare[1], magicSquare[0]];
+        if (Math.random() < 0.5) [magicSquare[2], magicSquare[3]] = [magicSquare[3], magicSquare[2]];
+
+        // Random column swaps (within pairs)
+        if (Math.random() < 0.5) {
+            for (let i = 0; i < 4; i++) {
+                [magicSquare[i][0], magicSquare[i][1]] = [magicSquare[i][1], magicSquare[i][0]];
+            }
+        }
+        if (Math.random() < 0.5) {
+            for (let i = 0; i < 4; i++) {
+                [magicSquare[i][2], magicSquare[i][3]] = [magicSquare[i][3], magicSquare[i][2]];
+            }
         }
 
         // Save this as our target state first
@@ -243,7 +259,7 @@ class SlidokuGame {
                 tile.dataset.col = j;
 
                 tile.textContent = this.board[i][j];
-                
+
                 // Add classes for special tiles
                 if (i === this.emptyTile.row && j === this.emptyTile.col) {
                     tile.classList.add('empty');
@@ -255,7 +271,7 @@ class SlidokuGame {
                 }
 
                 // Check if tile is in correct position
-                if (this.targetState && this.board[i][j] === this.targetState[i][j] && 
+                if (this.targetState && this.board[i][j] === this.targetState[i][j] &&
                     this.board[i][j] !== 0) { // Don't highlight empty tile
                     tile.classList.add('correct-position');
                 }
