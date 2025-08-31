@@ -60,12 +60,10 @@ class SlidokuGame {
     }
 
     calculateTargetSum() {
-        // Calculate sum excluding the value 8 (which will be the fixed tile)
-        const numbers = Array.from({length: 15}, (_, i) => i + 1).filter(n => n !== 8);
-        const totalSum = numbers.reduce((a, b) => a + b, 0) + 8; // Add back the fixed tile value
-        this.targetSum = Math.floor(totalSum / this.size);
+        // For a 4x4 magic square, the sum is always 34
+        this.targetSum = 34;
         document.getElementById('targetSum').textContent = this.targetSum;
-        console.log('Target sum calculated:', this.targetSum);
+        console.log('Target sum set to:', this.targetSum);
     }
 
     initializeGame() {
@@ -77,8 +75,6 @@ class SlidokuGame {
 
 generateBoard() {
     console.log('Generating board...');
-    this.board = Array(this.size).fill().map(() => Array(this.size).fill(0));
-
     // Base 4x4 magic square (rows/cols sum = 34)
     let magicSquare = [
         [16, 2, 3, 13],
@@ -111,21 +107,24 @@ generateBoard() {
         magicSquare = reflectH(magicSquare);
     }
 
-    // Replace 16 with 0
+    // Save this as our target state first
+    this.targetState = magicSquare.map(row => [...row]);
+    
+    // Then create our game board from it
+    this.board = magicSquare.map(row => [...row]);
+
+    // Find the empty tile (16)
     for (let i = 0; i < this.size; i++) {
         for (let j = 0; j < this.size; j++) {
             if (magicSquare[i][j] === 16) {
-                //this.board[i][j] = 0;
                 this.emptyTile = { row: i, col: j };
-            } 
-            //else 
-                {
-                this.board[i][j] = magicSquare[i][j];
+                break;
             }
         }
     }
 
-    console.log('Board generated:', this.board);
+    console.log('Target state:', this.targetState);
+    console.log('Initial board:', this.board);
 }
 
 
@@ -147,6 +146,7 @@ generateBoard() {
                 tile.textContent = this.board[i][j];
                 if (i === this.emptyTile.row && j === this.emptyTile.col) {
                     tile.classList.add('empty');
+                    tile.classList.add('light-text');
                 }
 
                 if (i === this.fixedTile.row && j === this.fixedTile.col) {
@@ -410,6 +410,7 @@ generateBoard() {
                 tile.textContent = this.targetState[i][j];
                 if (i === this.emptyTile.row && j === this.emptyTile.col) {
                     tile.classList.add('empty');
+                    tile.classList.add('light-text');
                 }
 
                 if (i === this.fixedTile.row && j === this.fixedTile.col) {
@@ -421,28 +422,6 @@ generateBoard() {
         }
     }
 
-    generateTargetState() {
-        console.log('Generating target state...');
-        // Create numbers 1-15 excluding 8 (which will be our fixed tile)
-        const numbers = Array.from({length: 15}, (_, i) => i + 1).filter(n => n !== 8);
-        const board = Array(this.size).fill().map(() => Array(this.size).fill(0));
-        let index = 0;
-
-        // Place numbers ensuring fixed tile is 8 and respecting sum constraints
-        for (let i = 0; i < this.size; i++) {
-            for (let j = 0; j < this.size; j++) {
-                if (i === this.emptyTile.row && j === this.emptyTile.col) {
-                    board[i][j] = 0;
-                } else if (i === this.fixedTile.row && j === this.fixedTile.col) {
-                    board[i][j] = 8;
-                } else {
-                    board[i][j] = numbers[index++];
-                }
-            }
-        }
-
-        return board;
-    }
 }
 
 // Start the game when the page loads

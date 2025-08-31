@@ -120,6 +120,10 @@ h1 {
     cursor: not-allowed;
 }
 
+.tile.light-text {
+    color: #999999;
+}
+
 /* Modal styles */
 .modal {
     display: none;
