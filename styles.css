@@ -103,6 +103,10 @@ h1 {
     color: #999999;
 }
 
+.tile.correct-position {
+    border: 3px solid #4CAF50;
+}
+
 /* Modal styles */
 .modal {
     display: none;

@@ -243,6 +243,8 @@ class SlidokuGame {
                 tile.dataset.col = j;
 
                 tile.textContent = this.board[i][j];
+                
+                // Add classes for special tiles
                 if (i === this.emptyTile.row && j === this.emptyTile.col) {
                     tile.classList.add('empty');
                     tile.classList.add('light-text');
@@ -250,6 +252,12 @@ class SlidokuGame {
 
                 if (i === this.fixedTile.row && j === this.fixedTile.col) {
                     tile.classList.add('fixed');
+                }
+
+                // Check if tile is in correct position
+                if (this.targetState && this.board[i][j] === this.targetState[i][j] && 
+                    this.board[i][j] !== 0) { // Don't highlight empty tile
+                    tile.classList.add('correct-position');
                 }
 
                 gameBoard.appendChild(tile);
