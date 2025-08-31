@@ -35,18 +35,48 @@ h1 {
     font-size: 1.2em;
 }
 
-#newGame {
+.game-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.game-buttons button {
     padding: 10px 20px;
     font-size: 1em;
-    background-color: #4CAF50;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
 }
 
+#newGame {
+    background-color: #4CAF50;
+}
+
 #newGame:hover {
     background-color: #45a049;
+}
+
+#hint {
+    background-color: #2196F3;
+}
+
+#hint:hover {
+    background-color: #1976D2;
+}
+
+/* Add styles for hint highlighting */
+.tile.hint {
+    animation: hintPulse 0.5s infinite;
+    background-color: #2196F3;
+    color: white;
+}
+
+@keyframes hintPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
 }
 
 .game-container {

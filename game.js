@@ -1,12 +1,31 @@
 class SlidokuGame {
     constructor() {
+        console.log('Initializing SlidokuGame...');
         this.board = [];
         this.size = 4;
         this.emptyTile = { row: 3, col: 3 }; // Position of empty tile
         this.fixedTile = { row: 1, col: 1 }; // Position of fixed tile
-        this.calculateTargetSum();
-        this.initializeGame();
-        this.setupEventListeners();
+        
+        // Ensure DOM is loaded before proceeding
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                this.init();
+            });
+        } else {
+            this.init();
+        }
+    }
+
+    init() {
+        console.log('Running init...');
+        try {
+            this.calculateTargetSum();
+            this.initializeGame();
+            this.setupEventListeners();
+            console.log('Initialization complete');
+        } catch (error) {
+            console.error('Error during initialization:', error);
+        }
     }
 
     calculateTargetSum() {
@@ -26,27 +45,113 @@ class SlidokuGame {
     }
 
     generateValidBoard() {
-        const numbers = new Set();
+        console.log('Generating valid board...');
         this.board = Array(this.size).fill().map(() => Array(this.size).fill(0));
         
-        // Generate unique numbers that satisfy row and column sums
-        // Use numbers 1-15 for better sum distribution
-        const availableNumbers = Array.from({length: 15}, (_, i) => i + 1);
+        // Create a list of numbers 1-15, excluding 8 (which we'll use for fixed tile)
+        const numbers = Array.from({length: 15}, (_, i) => i + 1).filter(n => n !== 8);
         
-        // Shuffle available numbers
-        for (let i = availableNumbers.length - 1; i > 0; i--) {
+        // Shuffle the numbers
+        for (let i = numbers.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [availableNumbers[i], availableNumbers[j]] = [availableNumbers[j], availableNumbers[i]];
-        }
-        
-        // Take the first 15 numbers (leaving one space for empty tile)
-        for (let i = 0; i < this.size * this.size - 1; i++) {
-            numbers.add(availableNumbers[i]);
+            [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
         }
 
-        // Convert Set to Array and shuffle
-        const shuffledNumbers = Array.from(numbers).sort(() => Math.random() - 0.5);
         let index = 0;
+        
+        // Place numbers on the board
+        for (let i = 0; i < this.size; i++) {
+            for (let j = 0; j < this.size; j++) {
+                if (i === this.emptyTile.row && j === this.emptyTile.col) {
+                    this.board[i][j] = 0; // Empty tile
+                } else if (i === this.fixedTile.row && j === this.fixedTile.col) {
+                    this.board[i][j] = 8; // Fixed tile gets middle value
+                } else {
+                    this.board[i][j] = numbers[index++];
+                }
+            }
+        }
+
+        console.log('Board generated:', this.board);
+        return true;
+    }
+
+    generateValidArrangement(numbers) {
+        // Shuffle numbers
+        const shuffled = [...numbers].sort(() => Math.random() - 0.5);
+        
+        // Check if arrangement can achieve target sums
+        let rowSums = Array(4).fill(0);
+        let colSums = Array(4).fill(0);
+        let index = 0;
+
+        for (let i = 0; i < this.size; i++) {
+            for (let j = 0; j < this.size; j++) {
+                if (i === this.emptyTile.row && j === this.emptyTile.col) continue;
+                
+                const num = shuffled[index++];
+                rowSums[i] += num;
+                colSums[j] += num;
+            }
+        }
+
+        // Check if sums are achievable (allowing for some variance due to empty tile)
+        const targetSumRange = 5; // Allow some variance in sums
+        const isValid = rowSums.every(sum => Math.abs(sum - this.targetSum) <= targetSumRange) &&
+                       colSums.every(sum => Math.abs(sum - this.targetSum) <= targetSumRange);
+
+        return isValid ? shuffled : null;
+    }
+
+    isSolvable() {
+        // Convert board to 1D array excluding empty tile
+        const tiles = [];
+        for (let i = 0; i < this.size; i++) {
+            for (let j = 0; j < this.size; j++) {
+                if (this.board[i][j] !== 0) {
+                    tiles.push(this.board[i][j]);
+                }
+            }
+        }
+
+        // Count inversions
+        let inversions = 0;
+        for (let i = 0; i < tiles.length - 1; i++) {
+            for (let j = i + 1; j < tiles.length; j++) {
+                if (tiles[i] > tiles[j]) inversions++;
+            }
+        }
+
+        // For a 4x4 puzzle with empty tile on even row from bottom, 
+        // number of inversions must be odd for puzzle to be solvable
+        const emptyRowFromBottom = this.size - this.emptyTile.row;
+        return emptyRowFromBottom % 2 === 0 ? inversions % 2 === 1 : inversions % 2 === 0;
+    }
+
+    generateSimpleSolvableBoard() {
+        console.log('Generating simple solvable board as fallback');
+        // Generate a simple, definitely solvable board as fallback
+        const numbers = Array.from({length: 15}, (_, i) => i + 1);
+        this.board = Array(this.size).fill().map(() => Array(this.size).fill(0));
+        let index = 0;
+        
+        // Place numbers in a way that ensures solvability
+        for (let i = 0; i < this.size; i++) {
+            for (let j = 0; j < this.size; j++) {
+                if (i === this.emptyTile.row && j === this.emptyTile.col) {
+                    this.board[i][j] = 0;
+                } else if (i === this.fixedTile.row && j === this.fixedTile.col) {
+                    // Place a moderate value in the fixed tile
+                    this.board[i][j] = 8; // Middle value that helps with sums
+                } else if (index < numbers.length) {
+                    // Skip 8 as it's used for the fixed tile
+                    this.board[i][j] = numbers[index] === 8 ? numbers[index + 1] : numbers[index];
+                    index++;
+                }
+            }
+        }
+        console.log('Simple board generated:', this.board);
+    }
 
         // Place numbers on the board
         for (let i = 0; i < this.size; i++) {
@@ -151,16 +256,142 @@ class SlidokuGame {
             const col = parseInt(tile.dataset.col);
 
             this.swapTiles(row, col, this.emptyTile.row, this.emptyTile.col);
+            
+            // Remove hint highlighting after a move
+            this.clearHint();
         });
 
         const newGameButton = document.getElementById('newGame');
         newGameButton.addEventListener('click', () => {
             this.initializeGame();
+            this.clearHint();
         });
+
+        const hintButton = document.getElementById('hint');
+        hintButton.addEventListener('click', () => {
+            this.showHint();
+        });
+    }
+
+    clearHint() {
+        const tiles = document.querySelectorAll('.tile');
+        tiles.forEach(tile => tile.classList.remove('hint'));
+    }
+
+    calculateTileFitness(row, col) {
+        let fitness = 0;
+        const value = this.board[row][col];
+        if (value === 0) return -Infinity; // Empty tile
+        if (row === this.fixedTile.row && col === this.fixedTile.col) return -Infinity; // Fixed tile
+
+        // Calculate how much this tile contributes to reaching target sum in its row and column
+        const rowSum = this.board[row].reduce((sum, val) => sum + val, 0);
+        const colSum = this.board.reduce((sum, r) => sum + r[col], 0);
+        
+        fitness -= Math.abs(this.targetSum - rowSum);
+        fitness -= Math.abs(this.targetSum - colSum);
+
+        return fitness;
+    }
+
+    findBestMove() {
+        console.log('Finding best move. Empty tile at:', this.emptyTile);
+        const possibleMoves = [];
+        const directions = [
+            [-1, 0], // up
+            [1, 0],  // down
+            [0, -1], // left
+            [0, 1]   // right
+        ];
+
+        console.log('Current board state:', this.board);
+        // Find all possible moves
+        for (const [dx, dy] of directions) {
+            const newRow = this.emptyTile.row + dx;
+            const newCol = this.emptyTile.col + dy;
+
+            if (newRow >= 0 && newRow < this.size && 
+                newCol >= 0 && newCol < this.size &&
+                !(newRow === this.fixedTile.row && newCol === this.fixedTile.col)) {
+                
+                // Simulate the move
+                const originalValue = this.board[newRow][newCol];
+                this.board[newRow][newCol] = 0;
+                this.board[this.emptyTile.row][this.emptyTile.col] = originalValue;
+
+                // Calculate fitness after move
+                let fitness = 0;
+                for (let i = 0; i < this.size; i++) {
+                    for (let j = 0; j < this.size; j++) {
+                        fitness += this.calculateTileFitness(i, j);
+                    }
+                }
+
+                // Undo the move
+                this.board[this.emptyTile.row][this.emptyTile.col] = 0;
+                this.board[newRow][newCol] = originalValue;
+
+                possibleMoves.push({
+                    row: newRow,
+                    col: newCol,
+                    fitness: fitness
+                });
+            }
+        }
+
+        // Return the move with the highest fitness
+        return possibleMoves.reduce((best, move) => 
+            move.fitness > best.fitness ? move : best, 
+            { fitness: -Infinity }
+        );
+    }
+
+    showHint() {
+        console.log('ShowHint called');
+        const bestMove = this.findBestMove();
+        console.log('Best move found:', bestMove);
+        
+        if (bestMove.row !== undefined) {
+            console.log('Valid move found, attempting to highlight tile at:', bestMove.row, bestMove.col);
+            // First highlight the tile that will move
+            const tiles = document.querySelectorAll('.tile');
+            console.log('Found tiles:', tiles.length);
+            
+            let tileFound = false;
+            tiles.forEach(tile => {
+                const row = parseInt(tile.dataset.row);
+                const col = parseInt(tile.dataset.col);
+                if (row === bestMove.row && col === bestMove.col) {
+                    console.log('Highlighting tile at:', row, col);
+                    tile.classList.add('hint');
+                    tileFound = true;
+                }
+            });
+            
+            if (!tileFound) {
+                console.log('No matching tile found for highlight');
+            }
+
+            // After a short delay, move the tile
+            console.log('Setting up move timeout');
+            setTimeout(() => {
+                console.log('Executing move');
+                this.swapTiles(bestMove.row, bestMove.col, this.emptyTile.row, this.emptyTile.col);
+                this.clearHint();
+            }, 500);
+        } else {
+            console.log('No valid move found');
+        }
     }
 }
 
 // Start the game when the page loads
+let game;
 window.addEventListener('DOMContentLoaded', () => {
-    new SlidokuGame();
+    console.log('DOMContentLoaded event fired');
+    try {
+        game = new SlidokuGame();
+    } catch (error) {
+        console.error('Error creating game:', error);
+    }
 });
