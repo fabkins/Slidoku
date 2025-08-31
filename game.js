@@ -2,11 +2,20 @@ class SlidokuGame {
     constructor() {
         this.board = [];
         this.size = 4;
-        this.targetSum = 34; // Target sum for each row and column
         this.emptyTile = { row: 3, col: 3 }; // Position of empty tile
         this.fixedTile = { row: 1, col: 1 }; // Position of fixed tile
+        this.calculateTargetSum();
         this.initializeGame();
         this.setupEventListeners();
+    }
+
+    calculateTargetSum() {
+        // Since we use numbers 1-15, calculate average sum per row/column
+        const totalSum = Array.from({length: 15}, (_, i) => i + 1).reduce((a, b) => a + b, 0);
+        // Divide by 4 (size) to get target sum per row/column, accounting for empty tile
+        this.targetSum = Math.floor(totalSum / this.size);
+        // Update the display
+        document.getElementById('targetSum').textContent = this.targetSum;
     }
 
     initializeGame() {
@@ -21,11 +30,18 @@ class SlidokuGame {
         this.board = Array(this.size).fill().map(() => Array(this.size).fill(0));
         
         // Generate unique numbers that satisfy row and column sums
-        while (numbers.size < this.size * this.size - 1) { // -1 for empty tile
-            const num = Math.floor(Math.random() * 15) + 1;
-            if (!numbers.has(num)) {
-                numbers.add(num);
-            }
+        // Use numbers 1-15 for better sum distribution
+        const availableNumbers = Array.from({length: 15}, (_, i) => i + 1);
+        
+        // Shuffle available numbers
+        for (let i = availableNumbers.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [availableNumbers[i], availableNumbers[j]] = [availableNumbers[j], availableNumbers[i]];
+        }
+        
+        // Take the first 15 numbers (leaving one space for empty tile)
+        for (let i = 0; i < this.size * this.size - 1; i++) {
+            numbers.add(availableNumbers[i]);
         }
 
         // Convert Set to Array and shuffle
