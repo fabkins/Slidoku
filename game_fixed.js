@@ -146,15 +146,95 @@ class SlidokuGame {
         return true;
     }
 
+    
     generateBoard() {
         console.log('Generating board...');
-        // Base 4x4 magic square (rows/cols sum = 30 with 0–15)
-        let magicSquare = [
-            [15, 1, 2, 12],
-            [4, 10, 9, 7],
-            [8, 6, 5, 11],
-            [3, 13, 14, 0]
+        const MAGIC_SEEDS = [
+            [
+                [15, 1, 2, 12],
+                [4, 10, 9, 7],
+                [8, 6, 5, 11],
+                [3, 13, 14, 0]
+            ],        
+            [
+                [6, 8, 11, 5],
+                [9, 7, 4, 10],
+                [12, 0, 3, 15],
+                [3, 15, 12, 0]
+            ],
+            [
+                [14, 0, 3, 13],
+                [1, 15, 12, 2],
+                [9, 7, 10, 4],
+                [6, 8, 5, 11]
+            ],
+            [
+                [13, 3, 0, 14],
+                [2, 12, 15, 1],
+                [4, 10, 7, 9],
+                [11, 5, 8, 6]
+            ],
+            [
+                [8, 6, 5, 11],
+                [7, 9, 10, 4],
+                [12, 0, 3, 15],
+                [3, 15, 12, 0]
+            ],
+            [
+                [11, 5, 8, 6],
+                [4, 10, 7, 9],
+                [2, 12, 15, 1],
+                [13, 3, 0, 14]
+            ],
+            [
+                [9, 7, 4, 10],
+                [6, 8, 11, 5],
+                [15, 1, 2, 12],
+                [0, 14, 13, 3]
+            ],
+
         ];
+        // Base 4x4 magic square (rows/cols sum = 30 with 0–15)
+        // let magicSquare = [
+        //     [15, 1, 2, 12],
+        //     [4, 10, 9, 7],
+        //     [8, 6, 5, 11],
+        //     [3, 13, 14, 0]
+        // ];
+
+        // Run routine that validates that the magic square seeds are valid, ensuring all numbers 0-15 are present
+        // that each row adds up to 30 and each column adds up to 30
+
+        const isValidMagicSquare = (square) => {
+            const size = square.length;
+            const magicSum = 30;
+
+            // Check rows
+            for (let i = 0; i < size; i++) {
+                const rowSum = square[i].reduce((a, b) => a + b, 0);
+                if (rowSum !== magicSum) return false;
+            }
+
+            // Check columns
+            for (let j = 0; j < size; j++) {
+                const colSum = square.reduce((a, b) => a + b[j], 0);
+                if (colSum !== magicSum) return false;
+            }
+
+            return true;
+        };
+        for (const seed of MAGIC_SEEDS) {
+            if (isValidMagicSquare(seed)) {
+                console.log('Valid magic square found:', seed);
+            }
+            else{
+                // log the invalid magic square
+                console.log('Invalid magic square found:', seed);
+            }
+        }
+
+        let magicSquare = MAGIC_SEEDS[Math.floor(Math.random() * MAGIC_SEEDS.length)]
+            .map(row => [...row]);
 
         // Helper: rotate 90 degrees
         const rotate90 = (grid) => {
@@ -215,6 +295,9 @@ class SlidokuGame {
         console.log('Target state:', this.targetState);
         console.log('Initial board:', this.board);
     }
+
+
+
 
     shuffleBoard(moves = 100) {
         console.log(`Shuffling board with ${moves} random moves...`);
