@@ -7,7 +7,7 @@ class SlidokuGame {
         this.fixedTile = { row: 1, col: 1 }; // Position of fixed tile
         this.moveHistory = new Set(); // Track previous positions to avoid loops
         this.targetState = null; // Will store our goal state
-        
+
         // Ensure DOM is loaded before proceeding
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => {
@@ -71,61 +71,88 @@ class SlidokuGame {
         this.generateBoard();
         this.renderBoard();
         this.updateSums();
+        this.shuffleBoard();
     }
 
-generateBoard() {
-    console.log('Generating board...');
-    // Base 4x4 magic square (rows/cols sum = 34)
-    let magicSquare = [
-        [16, 2, 3, 13],
-        [5, 11, 10, 8],
-        [9, 7, 6, 12],
-        [4, 14, 15, 1]
-    ];
+    generateBoard() {
+        console.log('Generating board...');
+        // Base 4x4 magic square (rows/cols sum = 34)
+        let magicSquare = [
+            [16, 2, 3, 13],
+            [5, 11, 10, 8],
+            [9, 7, 6, 12],
+            [4, 14, 15, 1]
+        ];
 
-    // Helper: rotate 90 degrees
-    const rotate90 = (grid) => {
-        const n = grid.length;
-        let newGrid = Array(n).fill().map(() => Array(n).fill(0));
-        for (let i = 0; i < n; i++) {
-            for (let j = 0; j < n; j++) {
-                newGrid[j][n - i - 1] = grid[i][j];
+        // Helper: rotate 90 degrees
+        const rotate90 = (grid) => {
+            const n = grid.length;
+            let newGrid = Array(n).fill().map(() => Array(n).fill(0));
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    newGrid[j][n - i - 1] = grid[i][j];
+                }
+            }
+            return newGrid;
+        };
+
+        // Helper: reflect horizontally
+        const reflectH = (grid) => grid.map(row => [...row].reverse());
+
+        // Apply random symmetries
+        let r = Math.floor(Math.random() * 4); // 0–3 rotations
+        for (let i = 0; i < r; i++) {
+            magicSquare = rotate90(magicSquare);
+        }
+        if (Math.random() < 0.5) {
+            magicSquare = reflectH(magicSquare);
+        }
+
+        // Save this as our target state first
+        this.targetState = magicSquare.map(row => [...row]);
+
+        // Then create our game board from it
+        this.board = magicSquare.map(row => [...row]);
+
+        // Find the empty tile (16)
+        for (let i = 0; i < this.size; i++) {
+            for (let j = 0; j < this.size; j++) {
+                if (magicSquare[i][j] === 16) {
+                    this.emptyTile = { row: i, col: j };
+                    break;
+                }
             }
         }
-        return newGrid;
-    };
 
-    // Helper: reflect horizontally
-    const reflectH = (grid) => grid.map(row => [...row].reverse());
-
-    // Apply random symmetries
-    let r = Math.floor(Math.random() * 4); // 0–3 rotations
-    for (let i = 0; i < r; i++) {
-        magicSquare = rotate90(magicSquare);
-    }
-    if (Math.random() < 0.5) {
-        magicSquare = reflectH(magicSquare);
+        console.log('Target state:', this.targetState);
+        console.log('Initial board:', this.board);
     }
 
-    // Save this as our target state first
-    this.targetState = magicSquare.map(row => [...row]);
-    
-    // Then create our game board from it
-    this.board = magicSquare.map(row => [...row]);
+    shuffleBoard(moves = 100) {
+        console.log(`Shuffling board with ${moves} random moves...`);
+        for (let i = 0; i < moves; i++) {
+            const { row, col } = this.emptyTile;
 
-    // Find the empty tile (16)
-    for (let i = 0; i < this.size; i++) {
-        for (let j = 0; j < this.size; j++) {
-            if (magicSquare[i][j] === 16) {
-                this.emptyTile = { row: i, col: j };
-                break;
-            }
+            // Find valid neighbors (tiles adjacent to empty)
+            let neighbors = [];
+            if (row > 0) neighbors.push([row - 1, col]); // up
+            if (row < this.size - 1) neighbors.push([row + 1, col]); // down
+            if (col > 0) neighbors.push([row, col - 1]); // left
+            if (col < this.size - 1) neighbors.push([row, col + 1]); // right
+
+            // Filter out the fixed tile (cannot be moved)
+            neighbors = neighbors.filter(([r, c]) => !(r === this.fixedTile.row && c === this.fixedTile.col));
+
+            if (neighbors.length === 0) continue; // rare edge case
+
+            // Pick a random valid neighbor and swap with the empty tile
+            const [r2, c2] = neighbors[Math.floor(Math.random() * neighbors.length)];
+            this.swapTiles(row, col, r2, c2);
         }
+
+        console.log("Board shuffled:", this.board);
     }
 
-    console.log('Target state:', this.targetState);
-    console.log('Initial board:', this.board);
-}
 
 
     renderBoard() {
@@ -161,12 +188,12 @@ generateBoard() {
     updateSums() {
         const rowSums = document.querySelector('.row-sums');
         const columnSums = document.querySelector('.column-sums');
-        
+
         if (!rowSums || !columnSums) {
             console.error('Sum elements not found');
             return;
         }
-        
+
         rowSums.innerHTML = '';
         columnSums.innerHTML = '';
 
@@ -205,8 +232,8 @@ generateBoard() {
             }
 
             // Swap the values
-            [this.board[row1][col1], this.board[row2][col2]] = 
-            [this.board[row2][col2], this.board[row1][col1]];
+            [this.board[row1][col1], this.board[row2][col2]] =
+                [this.board[row2][col2], this.board[row1][col1]];
 
             // Update empty tile position
             if (row1 === this.emptyTile.row && col1 === this.emptyTile.col) {
@@ -226,7 +253,7 @@ generateBoard() {
     showHint() {
         console.log('ShowHint called');
         const bestMove = this.findBestMove();
-        
+
         if (bestMove && bestMove.row !== undefined) {
             console.log('Moving tile at:', bestMove.row, bestMove.col);
             this.swapTiles(bestMove.row, bestMove.col, this.emptyTile.row, this.emptyTile.col);
@@ -237,7 +264,7 @@ generateBoard() {
 
     findBestMove() {
         console.log('Finding best move. Empty tile at:', this.emptyTile);
-        
+
         // Generate target state if not exists
         if (!this.targetState) {
             this.generateTargetState();
@@ -256,10 +283,10 @@ generateBoard() {
             const newRow = this.emptyTile.row + dx;
             const newCol = this.emptyTile.col + dy;
 
-            if (newRow >= 0 && newRow < this.size && 
+            if (newRow >= 0 && newRow < this.size &&
                 newCol >= 0 && newCol < this.size &&
                 !(newRow === this.fixedTile.row && newCol === this.fixedTile.col)) {
-                
+
                 // Check if this move would create a loop
                 const moveKey = `${newRow},${newCol}`;
                 if (this.moveHistory.has(moveKey)) {
@@ -295,13 +322,13 @@ generateBoard() {
 
     generateTargetState() {
         // Create an ideal arrangement where sums are closest to target
-        let numbers = Array.from({length: 15}, (_, i) => i + 1).filter(n => n !== 8);
+        let numbers = Array.from({ length: 15 }, (_, i) => i + 1).filter(n => n !== 8);
         numbers.sort((a, b) => a - b);
-        
+
         this.targetState = Array(this.size).fill().map(() => Array(this.size).fill(0));
         let small = 0;
         let large = numbers.length - 1;
-        
+
         // Distribute numbers to balance row and column sums
         for (let i = 0; i < this.size; i++) {
             for (let j = 0; j < this.size; j++) {
@@ -320,7 +347,7 @@ generateBoard() {
 
     calculateMoveScore(value, newRow, newCol) {
         let score = 0;
-        
+
         // 1. Distance to target position
         if (this.targetState) {
             const targetPos = this.findTargetPosition(value);
@@ -401,12 +428,12 @@ generateBoard() {
         }
 
         targetBoard.innerHTML = '';
-        
+
         for (let i = 0; i < this.size; i++) {
             for (let j = 0; j < this.size; j++) {
                 const tile = document.createElement('div');
                 tile.className = 'tile';
-                
+
                 tile.textContent = this.targetState[i][j];
                 if (i === this.emptyTile.row && j === this.emptyTile.col) {
                     tile.classList.add('empty');
