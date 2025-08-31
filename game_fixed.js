@@ -24,10 +24,39 @@ class SlidokuGame {
             this.calculateTargetSum();
             this.initializeGame();
             this.setupEventListeners();
+            this.setupModal();
             console.log('Initialization complete');
         } catch (error) {
             console.error('Error during initialization:', error);
         }
+    }
+
+    setupModal() {
+        console.log('Setting up modal...');
+        const modal = document.getElementById('targetModal');
+        const btn = document.getElementById('showTarget');
+        const span = document.getElementsByClassName('close')[0];
+
+        if (!modal || !btn || !span) {
+            console.error('Modal elements not found');
+            return;
+        }
+
+        btn.onclick = () => {
+            console.log('Show target clicked');
+            this.renderTargetBoard();
+            modal.style.display = 'block';
+        };
+
+        span.onclick = () => {
+            modal.style.display = 'none';
+        };
+
+        window.onclick = (event) => {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        };
     }
 
     calculateTargetSum() {
@@ -48,6 +77,8 @@ class SlidokuGame {
 
     generateBoard() {
         console.log('Generating board...');
+        // First, generate our target state
+        this.targetState = this.generateTargetState();
         this.board = Array(this.size).fill().map(() => Array(this.size).fill(0));
         
         // Create a list of numbers 1-15, excluding 8 (which we'll use for fixed tile)
@@ -180,25 +211,6 @@ class SlidokuGame {
             this.swapTiles(bestMove.row, bestMove.col, this.emptyTile.row, this.emptyTile.col);
         } else {
             console.log('No valid move found');
-        }
-    }
-
-    constructor() {
-        console.log('Initializing SlidokuGame...');
-        this.board = [];
-        this.size = 4;
-        this.emptyTile = { row: 3, col: 3 }; // Position of empty tile
-        this.fixedTile = { row: 1, col: 1 }; // Position of fixed tile
-        this.moveHistory = new Set(); // Track previous positions to avoid loops
-        this.targetState = null; // Will store our goal state
-        
-        // Ensure DOM is loaded before proceeding
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => {
-                this.init();
-            });
-        } else {
-            this.init();
         }
     }
 
@@ -357,6 +369,59 @@ class SlidokuGame {
         } else {
             console.error('Hint button not found');
         }
+    }
+
+    renderTargetBoard() {
+        console.log('Rendering target board...');
+        const targetBoard = document.querySelector('.target-board');
+        if (!targetBoard || !this.targetState) {
+            console.error('Target board element or target state not found');
+            return;
+        }
+
+        targetBoard.innerHTML = '';
+        
+        for (let i = 0; i < this.size; i++) {
+            for (let j = 0; j < this.size; j++) {
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                
+                if (i === this.emptyTile.row && j === this.emptyTile.col) {
+                    tile.classList.add('empty');
+                } else {
+                    tile.textContent = this.targetState[i][j];
+                }
+
+                if (i === this.fixedTile.row && j === this.fixedTile.col) {
+                    tile.classList.add('fixed');
+                }
+
+                targetBoard.appendChild(tile);
+            }
+        }
+    }
+
+    generateTargetState() {
+        console.log('Generating target state...');
+        // Create numbers 1-15 excluding 8 (which will be our fixed tile)
+        const numbers = Array.from({length: 15}, (_, i) => i + 1).filter(n => n !== 8);
+        const board = Array(this.size).fill().map(() => Array(this.size).fill(0));
+        let index = 0;
+
+        // Place numbers ensuring fixed tile is 8 and respecting sum constraints
+        for (let i = 0; i < this.size; i++) {
+            for (let j = 0; j < this.size; j++) {
+                if (i === this.emptyTile.row && j === this.emptyTile.col) {
+                    board[i][j] = 0;
+                } else if (i === this.fixedTile.row && j === this.fixedTile.col) {
+                    board[i][j] = 8;
+                } else {
+                    board[i][j] = numbers[index++];
+                }
+            }
+        }
+
+        return board;
     }
 }
 
