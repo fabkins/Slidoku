@@ -75,37 +75,59 @@ class SlidokuGame {
         this.updateSums();
     }
 
-    generateBoard() {
-        console.log('Generating board...');
-        // First, generate our target state
-        this.targetState = this.generateTargetState();
-        this.board = Array(this.size).fill().map(() => Array(this.size).fill(0));
-        
-        // Create a list of numbers 1-15, excluding 8 (which we'll use for fixed tile)
-        const numbers = Array.from({length: 15}, (_, i) => i + 1).filter(n => n !== 8);
-        
-        // Shuffle the numbers
-        for (let i = numbers.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
-        }
+generateBoard() {
+    console.log('Generating board...');
+    this.board = Array(this.size).fill().map(() => Array(this.size).fill(0));
 
-        let index = 0;
-        
-        // Place numbers on the board
-        for (let i = 0; i < this.size; i++) {
-            for (let j = 0; j < this.size; j++) {
-                if (i === this.emptyTile.row && j === this.emptyTile.col) {
-                    this.board[i][j] = 0; // Empty tile
-                } else if (i === this.fixedTile.row && j === this.fixedTile.col) {
-                    this.board[i][j] = 8; // Fixed tile gets middle value
-                } else if (index < numbers.length) {
-                    this.board[i][j] = numbers[index++];
-                }
+    // Base 4x4 magic square (rows/cols sum = 34)
+    let magicSquare = [
+        [16, 2, 3, 13],
+        [5, 11, 10, 8],
+        [9, 7, 6, 12],
+        [4, 14, 15, 1]
+    ];
+
+    // Helper: rotate 90 degrees
+    const rotate90 = (grid) => {
+        const n = grid.length;
+        let newGrid = Array(n).fill().map(() => Array(n).fill(0));
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < n; j++) {
+                newGrid[j][n - i - 1] = grid[i][j];
             }
         }
-        console.log('Board generated:', this.board);
+        return newGrid;
+    };
+
+    // Helper: reflect horizontally
+    const reflectH = (grid) => grid.map(row => [...row].reverse());
+
+    // Apply random symmetries
+    let r = Math.floor(Math.random() * 4); // 0–3 rotations
+    for (let i = 0; i < r; i++) {
+        magicSquare = rotate90(magicSquare);
     }
+    if (Math.random() < 0.5) {
+        magicSquare = reflectH(magicSquare);
+    }
+
+    // Replace 16 with 0
+    for (let i = 0; i < this.size; i++) {
+        for (let j = 0; j < this.size; j++) {
+            if (magicSquare[i][j] === 16) {
+                //this.board[i][j] = 0;
+                this.emptyTile = { row: i, col: j };
+            } 
+            //else 
+                {
+                this.board[i][j] = magicSquare[i][j];
+            }
+        }
+    }
+
+    console.log('Board generated:', this.board);
+}
+
 
     renderBoard() {
         const gameBoard = document.querySelector('.game-board');
