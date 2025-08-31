@@ -417,14 +417,25 @@ class SlidokuGame {
         }
 
         targetBoard.innerHTML = '';
-
+        
+        // Find where 16 is in the target state
+        let targetEmptyTile = {row: 0, col: 0};
+        for (let i = 0; i < this.size; i++) {
+            for (let j = 0; j < this.size; j++) {
+                if (this.targetState[i][j] === 16) {
+                    targetEmptyTile = {row: i, col: j};
+                    break;
+                }
+            }
+        }
+        
         for (let i = 0; i < this.size; i++) {
             for (let j = 0; j < this.size; j++) {
                 const tile = document.createElement('div');
                 tile.className = 'tile';
-
+                
                 tile.textContent = this.targetState[i][j];
-                if (i === this.emptyTile.row && j === this.emptyTile.col) {
+                if (i === targetEmptyTile.row && j === targetEmptyTile.col) {
                     tile.classList.add('empty');
                     tile.classList.add('light-text');
                 }
@@ -436,9 +447,7 @@ class SlidokuGame {
                 targetBoard.appendChild(tile);
             }
         }
-    }
-
-}
+    }}
 
 // Start the game when the page loads
 let game;
