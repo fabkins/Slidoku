@@ -6,6 +6,9 @@ class SlidokuGame {
         this.emptyTile = { row: 3, col: 3 }; // Position of empty tile
         this.fixedTile = { row: 1, col: 1 }; // Position of fixed tile
         this.targetState = null; // Will store our goal state
+        this.moves = 0;
+        this.startTime = null;
+        this.timer = null;
 
         // Ensure DOM is loaded before proceeding
         if (document.readyState === 'loading') {
@@ -67,10 +70,80 @@ class SlidokuGame {
 
     initializeGame() {
         console.log('Initializing game...');
+        this.resetGame();
         this.generateBoard();
         this.renderBoard();
         this.updateSums();
         this.shuffleBoard();
+    }
+
+    resetGame() {
+        this.moves = 0;
+        this.startTime = null;
+        if (this.timer) {
+            clearInterval(this.timer);
+            this.timer = null;
+        }
+    }
+
+    checkWin() {
+        // Check if all rows and columns sum to 34
+        for (let i = 0; i < this.size; i++) {
+            const rowSum = this.board[i].reduce((sum, val) => sum + val, 0);
+            const colSum = this.board.reduce((sum, row) => sum + row[i], 0);
+            if (rowSum !== 30 || colSum !== 30) {
+                return false;
+            }
+        }
+
+        // Calculate time taken
+        const endTime = new Date();
+        const timeDiff = Math.floor((endTime - this.startTime) / 1000); // in seconds
+        const minutes = Math.floor(timeDiff / 60);
+        const seconds = timeDiff % 60;
+
+        // Create and show completion modal
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        `;
+
+        const content = document.createElement('div');
+        content.style.cssText = `
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 80%;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        `;
+
+        content.innerHTML = `
+            <h2>Congratulations!</h2>
+            <p>Puzzle completed in ${this.moves} moves</p>
+            <p>Time: ${minutes}m ${seconds}s</p>
+            <button onclick="this.parentElement.parentElement.remove()">Close</button>
+        `;
+
+        modal.appendChild(content);
+        document.body.appendChild(modal);
+
+        // Stop the timer
+        if (this.timer) {
+            clearInterval(this.timer);
+            this.timer = null;
+        }
+
+        return true;
     }
 
     generateBoard() {
@@ -146,7 +219,7 @@ class SlidokuGame {
 
             // Pick a random valid neighbor and swap with the empty tile
             const [r2, c2] = neighbors[Math.floor(Math.random() * neighbors.length)];
-            this.swapTiles(row, col, r2, c2);
+            this.swapTiles(row, col, r2, c2, false);
         }
 
         console.log("Board shuffled:", this.board);
@@ -220,7 +293,7 @@ class SlidokuGame {
         );
     }
 
-    swapTiles(row1, col1, row2, col2) {
+    swapTiles(row1, col1, row2, col2, PcheckWin = true) {
         console.log('Attempting to swap tiles:', row1, col1, 'with', row2, col2);
         if (this.isAdjacent(row1, col1, row2, col2)) {
             // Don't allow moving the fixed tile
@@ -229,6 +302,14 @@ class SlidokuGame {
                 console.log('Cannot move fixed tile');
                 return;
             }
+
+            // Start timer on first move
+            if (this.startTime === null) {
+                this.startTime = new Date();
+            }
+
+            // Increment move counter
+            this.moves++;
 
             // Swap the values
             [this.board[row1][col1], this.board[row2][col2]] =
@@ -244,6 +325,11 @@ class SlidokuGame {
             console.log('Swap successful, updating display');
             this.renderBoard();
             this.updateSums();
+
+            // Check for win after updating sums
+            if (PcheckWin) {
+                this.checkWin();
+            }
         } else {
             console.log('Tiles are not adjacent');
         }
@@ -419,11 +505,11 @@ class SlidokuGame {
         targetBoard.innerHTML = '';
 
         // Find where 0 is in the target state
-        let targetEmptyTile = {row: 0, col: 0};
+        let targetEmptyTile = { row: 0, col: 0 };
         for (let i = 0; i < this.size; i++) {
             for (let j = 0; j < this.size; j++) {
                 if (this.targetState[i][j] === 0) {
-                    targetEmptyTile = {row: i, col: j};
+                    targetEmptyTile = { row: i, col: j };
                     break;
                 }
             }
