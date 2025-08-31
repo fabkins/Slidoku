@@ -72,9 +72,34 @@ class SlidokuGame {
         console.log('Initializing game...');
         this.resetGame();
         this.generateBoard();
+        this.randomizeFixedTile();
         this.renderBoard();
         this.updateSums();
         this.shuffleBoard();
+    }
+
+    randomizeFixedTile() {
+        // Center 4 positions are at (1,1), (1,2), (2,1), and (2,2)
+        const centerPositions = [
+            {row: 1, col: 1},
+            {row: 1, col: 2},
+            {row: 2, col: 1},
+            {row: 2, col: 2}
+        ];
+
+        // Filter out the position with the empty tile (0)
+        const validPositions = centerPositions.filter(pos => 
+            this.board[pos.row][pos.col] !== 0);
+
+        // Pick a random position from the valid ones
+        const randomPosition = validPositions[Math.floor(Math.random() * validPositions.length)];
+        
+        // Update the fixed tile position
+        this.fixedTile = randomPosition;
+        
+        // Re-render the board to show the new fixed tile position
+        this.renderBoard();
+        console.log('Fixed tile randomized to:', this.fixedTile);
     }
 
     resetGame() {
@@ -299,8 +324,10 @@ class SlidokuGame {
 
 
 
-    shuffleBoard(moves = 100) {
+    shuffleBoard(moves = 2) {
         console.log(`Shuffling board with ${moves} random moves...`);
+        let lastMoved = null; // Keep track of the last tile we moved
+
         for (let i = 0; i < moves; i++) {
             const { row, col } = this.emptyTile;
 
@@ -312,12 +339,23 @@ class SlidokuGame {
             if (col < this.size - 1) neighbors.push([row, col + 1]); // right
 
             // Filter out the fixed tile (cannot be moved)
-            neighbors = neighbors.filter(([r, c]) => !(r === this.fixedTile.row && c === this.fixedTile.col));
+            neighbors = neighbors.filter(([r, c]) => 
+                !(r === this.fixedTile.row && c === this.fixedTile.col));
+
+            // Filter out the last moved tile if we have other options
+            if (lastMoved && neighbors.length > 1) {
+                const betterNeighbors = neighbors.filter(([r, c]) => 
+                    !(r === lastMoved[0] && c === lastMoved[1]));
+                if (betterNeighbors.length > 0) {
+                    neighbors = betterNeighbors;
+                }
+            }
 
             if (neighbors.length === 0) continue; // rare edge case
 
             // Pick a random valid neighbor and swap with the empty tile
             const [r2, c2] = neighbors[Math.floor(Math.random() * neighbors.length)];
+            lastMoved = [row, col]; // Remember where the empty tile was
             this.swapTiles(row, col, r2, c2, false);
         }
 
