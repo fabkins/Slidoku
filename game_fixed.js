@@ -144,10 +144,9 @@ generateBoard() {
                 tile.dataset.row = i;
                 tile.dataset.col = j;
 
+                tile.textContent = this.board[i][j];
                 if (i === this.emptyTile.row && j === this.emptyTile.col) {
                     tile.classList.add('empty');
-                } else {
-                    tile.textContent = this.board[i][j];
                 }
 
                 if (i === this.fixedTile.row && j === this.fixedTile.col) {
@@ -408,10 +407,9 @@ generateBoard() {
                 const tile = document.createElement('div');
                 tile.className = 'tile';
                 
+                tile.textContent = this.targetState[i][j];
                 if (i === this.emptyTile.row && j === this.emptyTile.col) {
                     tile.classList.add('empty');
-                } else {
-                    tile.textContent = this.targetState[i][j];
                 }
 
                 if (i === this.fixedTile.row && j === this.fixedTile.col) {
