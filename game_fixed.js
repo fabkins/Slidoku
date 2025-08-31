@@ -5,7 +5,6 @@ class SlidokuGame {
         this.size = 4;
         this.emptyTile = { row: 3, col: 3 }; // Position of empty tile
         this.fixedTile = { row: 1, col: 1 }; // Position of fixed tile
-        this.moveHistory = new Set(); // Track previous positions to avoid loops
         this.targetState = null; // Will store our goal state
 
         // Ensure DOM is loaded before proceeding
@@ -398,7 +397,6 @@ class SlidokuGame {
         });
 
         const newGameButton = document.getElementById('newGame');
-        const hintButton = document.getElementById('hint');
 
         if (newGameButton) {
             newGameButton.addEventListener('click', () => {
@@ -407,15 +405,6 @@ class SlidokuGame {
             });
         } else {
             console.error('New game button not found');
-        }
-
-        if (hintButton) {
-            hintButton.addEventListener('click', () => {
-                console.log('Hint button clicked');
-                this.showHint();
-            });
-        } else {
-            console.error('Hint button not found');
         }
     }
 

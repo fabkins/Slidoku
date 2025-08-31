@@ -58,27 +58,6 @@ h1 {
     background-color: #45a049;
 }
 
-#hint {
-    background-color: #2196F3;
-}
-
-#hint:hover {
-    background-color: #1976D2;
-}
-
-/* Add styles for hint highlighting */
-.tile.hint {
-    animation: hintPulse 0.5s infinite;
-    background-color: #2196F3;
-    color: white;
-}
-
-@keyframes hintPulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
-}
-
 .game-container {
     display: flex;
     align-items: center;
