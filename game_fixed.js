@@ -77,10 +77,10 @@ class SlidokuGame {
         console.log('Generating board...');
         // Base 4x4 magic square (rows/cols sum = 34)
         let magicSquare = [
-            [16, 2, 3, 13],
-            [5, 11, 10, 8],
-            [9, 7, 6, 12],
-            [4, 14, 15, 1]
+            [15, 1, 2, 12],
+            [4, 10, 9, 7],
+            [8, 6, 5, 11],
+            [3, 13, 14, 0]
         ];
 
         // Helper: rotate 90 degrees
@@ -113,10 +113,10 @@ class SlidokuGame {
         // Then create our game board from it
         this.board = magicSquare.map(row => [...row]);
 
-        // Find the empty tile (16)
+        // Find the empty tile (0)
         for (let i = 0; i < this.size; i++) {
             for (let j = 0; j < this.size; j++) {
-                if (magicSquare[i][j] === 16) {
+                if (magicSquare[i][j] === 0) {
                     this.emptyTile = { row: i, col: j };
                     break;
                 }
@@ -417,25 +417,14 @@ class SlidokuGame {
         }
 
         targetBoard.innerHTML = '';
-        
-        // Find where 16 is in the target state
-        let targetEmptyTile = {row: 0, col: 0};
-        for (let i = 0; i < this.size; i++) {
-            for (let j = 0; j < this.size; j++) {
-                if (this.targetState[i][j] === 16) {
-                    targetEmptyTile = {row: i, col: j};
-                    break;
-                }
-            }
-        }
-        
+
         for (let i = 0; i < this.size; i++) {
             for (let j = 0; j < this.size; j++) {
                 const tile = document.createElement('div');
                 tile.className = 'tile';
-                
+
                 tile.textContent = this.targetState[i][j];
-                if (i === targetEmptyTile.row && j === targetEmptyTile.col) {
+                if (i === this.emptyTile.row && j === this.emptyTile.col) {
                     tile.classList.add('empty');
                     tile.classList.add('light-text');
                 }
@@ -447,7 +436,9 @@ class SlidokuGame {
                 targetBoard.appendChild(tile);
             }
         }
-    }}
+    }
+
+}
 
 // Start the game when the page loads
 let game;
