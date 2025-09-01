@@ -244,18 +244,44 @@ class SlidokuGame {
         const content = document.createElement('div');
         content.style.cssText = `
             background-color: white;
-            padding: 20px;
-            border-radius: 10px;
+            padding: 40px;
+            border-radius: 15px;
             text-align: center;
-            max-width: 80%;
-            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            max-width: 400px;
+            min-width: 300px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
         `;
 
         content.innerHTML = `
-            <h2>Congratulations!</h2>
-            <p>Puzzle completed in ${this.moves} moves</p>
-            <p>Time: ${minutes}m ${seconds}s</p>
-            <button onclick="this.parentElement.parentElement.remove()">Close</button>
+            <h2 style="
+                font-size: 28px;
+                color: #4CAF50;
+                margin-bottom: 25px;
+                font-weight: bold;
+            ">Congratulations!</h2>
+            <p style="
+                font-size: 18px;
+                margin: 15px 0;
+                color: #333;
+            ">Puzzle completed in ${this.moves} moves</p>
+            <p style="
+                font-size: 18px;
+                margin: 15px 0;
+                color: #333;
+            ">Time: ${minutes}m ${seconds}s</p>
+            <button style="
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                padding: 12px 30px;
+                border-radius: 6px;
+                font-size: 16px;
+                cursor: pointer;
+                margin-top: 25px;
+                transition: background-color 0.3s;
+            " onmouseover="this.style.backgroundColor='#45a049'"
+              onmouseout="this.style.backgroundColor='#4CAF50'"
+              onclick="this.parentElement.parentElement.remove()">Close</button>
         `;
 
         modal.appendChild(content);
