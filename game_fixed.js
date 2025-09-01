@@ -24,7 +24,7 @@ class SlidokuGame {
         console.log('Running init...');
         try {
             this.calculateTargetSum();
-            this.initializeGame();
+            this.initializeGame(true);
             this.setupEventListeners();
             this.setupModal();
             console.log('Initialization complete');
@@ -92,14 +92,12 @@ class SlidokuGame {
         console.log('Target sum set to:', this.targetSum);
     }
 
-    initializeGame(dontShuffleOneEdge = false) {
+    initializeGame() {
         console.log('Initializing game...');
         this.resetGame();
 
         // Get a new puzzle from the generator
-        const puzzle = SlidokuPuzzleGenerator.generatePuzzle({
-            dontShuffleOneEdge: dontShuffleOneEdge
-        });
+        const puzzle = SlidokuPuzzleGenerator.generatePuzzle();
 
         // Set up the game state from the puzzle
         this.board = puzzle.initialBoard;
