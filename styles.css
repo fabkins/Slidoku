@@ -55,6 +55,20 @@ h1 {
     color: #4CAF50;
 }
 
+#storageInfo {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #f8f8f8;
+    border-top: 1px solid #ddd;
+    padding: 8px;
+    font-size: 13px;
+    color: #666;
+    text-align: center;
+}
+}
+
 .game-buttons {
     display: flex;
     gap: 10px;
@@ -68,6 +82,8 @@ h1 {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    display: inline-block;
+    margin: 0 5px;
 }
 
 #newGame {
@@ -83,6 +99,11 @@ h1 {
     align-items: center;
     justify-content: center;
     margin: 20px 0;
+}
+
+.game-board {
+    position: relative;
+    overflow: hidden; /* Ensures banner doesn't overflow */
 }
 
 .game-board {

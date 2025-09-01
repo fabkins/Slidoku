@@ -12,6 +12,7 @@ class SlidokuGame {
         this.currentDate = null;
         this.currentDifficulty = null;
         this.bestScore = null;
+        this.gameCompleted = false; // Flag to track if the game is completed
         
         // Initialize storage availability flags
         this.cookiesAvailable = false;
@@ -106,27 +107,21 @@ class SlidokuGame {
     }
     
     showStorageWarning(type) {
-        // Create a warning element if it doesn't exist
-        let warningEl = document.getElementById('storageWarning');
-        if (!warningEl) {
-            warningEl = document.createElement('div');
-            warningEl.id = 'storageWarning';
-            warningEl.style.cssText = 'background-color: #ff5722; color: white; padding: 8px; margin-top: 10px; border-radius: 5px; font-size: 14px; text-align: center;';
-            
-            // Find a spot to insert it (after the game-info div)
-            const gameInfo = document.querySelector('.game-info');
-            if (gameInfo && gameInfo.parentNode) {
-                gameInfo.parentNode.insertBefore(warningEl, gameInfo.nextSibling);
-            }
+        // Create a storage info element if it doesn't exist
+        let infoEl = document.getElementById('storageInfo');
+        if (!infoEl) {
+            infoEl = document.createElement('div');
+            infoEl.id = 'storageInfo';
+            document.body.appendChild(infoEl); // Add to the end of the body
         }
         
-        // Set the message based on the type of warning
+        // Set the message based on the type of storage available
         if (type === 'cookies') {
-            warningEl.innerHTML = '⚠️ Your browser is blocking cookies. Best scores cannot be saved.';
+            infoEl.innerHTML = 'Game scores are stored locally in your browser.';
         } else if (type === 'cookiesFallback') {
-            warningEl.innerHTML = '⚠️ Using localStorage instead of cookies. Best scores will only be saved in this browser.';
+            infoEl.innerHTML = 'Game scores are saved in your browser\'s local storage.';
         } else if (type === 'all') {
-            warningEl.innerHTML = '⚠️ Your browser is blocking both cookies and localStorage. Best scores cannot be saved.';
+            infoEl.innerHTML = 'Note: Game scores cannot be saved due to browser settings.';
         }
     }
 
@@ -225,6 +220,10 @@ class SlidokuGame {
         console.log('Initializing game with date:', date, 'difficulty:', difficulty);
         this.resetGame();
         
+        // Reset completion state
+        this.gameCompleted = false;
+        this.removeCompletedBanner();
+        
         // Store current date and difficulty
         this.currentDate = date;
         this.currentDifficulty = difficulty;
@@ -310,10 +309,16 @@ class SlidokuGame {
     resetGame() {
         this.moves = 0;
         this.startTime = null;
+        this.gameCompleted = false;
+        
+        // Remove completed banner if exists
+        this.removeCompletedBanner();
+        
         if (this.timer) {
             clearInterval(this.timer);
             this.timer = null;
         }
+        
         // Update the best score display
         this.updateBestScoreDisplay();
     }
@@ -334,6 +339,12 @@ class SlidokuGame {
         const minutes = Math.floor(timeDiff / 60);
         const seconds = timeDiff % 60;
 
+        // Set the game state to completed to prevent further moves
+        this.gameCompleted = true;
+        
+        // Add a diagonal "COMPLETED" banner across the board
+        this.addCompletedBanner();
+        
         // Create and show completion modal
         const modal = document.createElement('div');
         modal.style.cssText = `
@@ -365,6 +376,11 @@ class SlidokuGame {
         const isNewBestScore = this.setBestScore(this.currentDate, this.currentDifficulty, this.moves);
         console.log(`In checkWin: Is new best score? ${isNewBestScore}`);
         console.log(`In checkWin: Current best score is now: ${this.bestScore}`);
+        
+        // Update the best score display immediately if we have a new best score
+        if (isNewBestScore) {
+            this.updateBestScoreDisplay();
+        }
         
         const bestScoreMessage = isNewBestScore ? 
             `<p style="font-size: 18px; margin: 15px 0; color: #FF5722; font-weight: bold;">New Best Score!</p>` : 
@@ -492,6 +508,13 @@ class SlidokuGame {
 
     async swapTiles(row1, col1, row2, col2, PcheckWin = true) {
         console.log('Attempting to swap tiles:', row1, col1, 'with', row2, col2);
+        
+        // Don't allow moves if the game is already completed
+        if (this.gameCompleted) {
+            console.log('Game is already completed. No more moves allowed.');
+            return;
+        }
+        
         if (this.isAdjacent(row1, col1, row2, col2)) {
             // Don't allow moving any fixed tile
             const isFixed1 = this.fixedTiles.some(fixed => fixed.row === row1 && fixed.col === col1);
@@ -893,6 +916,54 @@ class SlidokuGame {
         freshButton.style.fontWeight = 'bold';
         
         console.log('Debug cookies button setup complete');
+    }
+
+    // Add a diagonal "COMPLETED" banner across the game board
+    addCompletedBanner() {
+        // Remove any existing banner first
+        this.removeCompletedBanner();
+        
+        const gameBoard = document.querySelector('.game-board');
+        if (!gameBoard) return;
+        
+        // Create the banner container
+        const banner = document.createElement('div');
+        banner.id = 'completedBanner';
+        banner.style.cssText = `
+            position: absolute;
+            width: 150%;
+            top: 50%;
+            left: -25%;
+            transform: translateY(-50%) rotate(-35deg);
+            background-color: rgba(255, 0, 0, 0.8);
+            color: white;
+            font-weight: bold;
+            font-size: 2.5em;
+            text-align: center;
+            padding: 10px 0;
+            z-index: 100;
+            font-family: Arial, sans-serif;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            letter-spacing: 3px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        `;
+        
+        banner.textContent = 'COMPLETED';
+        
+        // Make sure the game board has position relative
+        gameBoard.style.position = 'relative';
+        gameBoard.style.overflow = 'hidden';
+        
+        // Add the banner to the game board
+        gameBoard.appendChild(banner);
+    }
+    
+    // Remove the completed banner
+    removeCompletedBanner() {
+        const existingBanner = document.getElementById('completedBanner');
+        if (existingBanner) {
+            existingBanner.remove();
+        }
     }
 
     renderTargetBoard() {
