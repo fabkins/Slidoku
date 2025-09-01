@@ -4,7 +4,7 @@ class SlidokuGame {
         this.board = [];
         this.size = 4;
         this.emptyTile = { row: 3, col: 3 }; // Position of empty tile
-        this.fixedTile = { row: 1, col: 1 }; // Position of fixed tile
+        this.fixedTiles = []; // Array of fixed tile positions
         this.targetState = null; // Will store our goal state
         this.moves = 0;
         this.startTime = null;
@@ -71,14 +71,15 @@ class SlidokuGame {
     initializeGame() {
         console.log('Initializing game...');
         this.resetGame();
+        this.fixedTiles = []; // Initialize empty array first
         this.generateBoard();
-        this.randomizeFixedTile();
+        this.randomizeFixedTiles(2); // Start with 2 fixed tiles
+        this.shuffleBoard();
         this.renderBoard();
         this.updateSums();
-        this.shuffleBoard();
     }
 
-    randomizeFixedTile() {
+    randomizeFixedTiles(numFixedTiles = 2) {
         // Center 4 positions are at (1,1), (1,2), (2,1), and (2,2)
         const centerPositions = [
             {row: 1, col: 1},
@@ -91,15 +92,19 @@ class SlidokuGame {
         const validPositions = centerPositions.filter(pos => 
             this.board[pos.row][pos.col] !== 0);
 
-        // Pick a random position from the valid ones
-        const randomPosition = validPositions[Math.floor(Math.random() * validPositions.length)];
+        // Clear existing fixed tiles
+        this.fixedTiles = [];
+
+        // Pick random positions without replacement
+        while (this.fixedTiles.length < numFixedTiles && validPositions.length > 0) {
+            const randomIndex = Math.floor(Math.random() * validPositions.length);
+            const position = validPositions.splice(randomIndex, 1)[0];
+            this.fixedTiles.push(position);
+        }
         
-        // Update the fixed tile position
-        this.fixedTile = randomPosition;
-        
-        // Re-render the board to show the new fixed tile position
+        // Re-render the board to show the new fixed tile positions
         this.renderBoard();
-        console.log('Fixed tile randomized to:', this.fixedTile);
+        console.log('Fixed tiles randomized to:', this.fixedTiles);
     }
 
     resetGame() {
@@ -341,9 +346,9 @@ class SlidokuGame {
             if (col > 0) neighbors.push([row, col - 1]); // left
             if (col < this.size - 1) neighbors.push([row, col + 1]); // right
 
-            // Filter out the fixed tile (cannot be moved)
+            // Filter out any fixed tiles (cannot be moved)
             neighbors = neighbors.filter(([r, c]) => 
-                !(r === this.fixedTile.row && c === this.fixedTile.col));
+                !this.fixedTiles.some(fixed => fixed.row === r && fixed.col === c));
 
             // Filter out the last moved tile if we have other options
             if (lastMoved && neighbors.length > 1) {
@@ -390,7 +395,8 @@ class SlidokuGame {
                     tile.classList.add('light-text');
                 }
 
-                if (i === this.fixedTile.row && j === this.fixedTile.col) {
+                // Check if this position is a fixed tile
+                if (this.fixedTiles.some(fixed => fixed.row === i && fixed.col === j)) {
                     tile.classList.add('fixed');
                 }
 
@@ -444,9 +450,10 @@ class SlidokuGame {
     swapTiles(row1, col1, row2, col2, PcheckWin = true) {
         console.log('Attempting to swap tiles:', row1, col1, 'with', row2, col2);
         if (this.isAdjacent(row1, col1, row2, col2)) {
-            // Don't allow moving the fixed tile
-            if ((row1 === this.fixedTile.row && col1 === this.fixedTile.col) ||
-                (row2 === this.fixedTile.row && col2 === this.fixedTile.col)) {
+            // Don't allow moving any fixed tile
+            const isFixed1 = this.fixedTiles.some(fixed => fixed.row === row1 && fixed.col === col1);
+            const isFixed2 = this.fixedTiles.some(fixed => fixed.row === row2 && fixed.col === col2);
+            if (isFixed1 || isFixed2) {
                 console.log('Cannot move fixed tile');
                 return;
             }
@@ -674,7 +681,8 @@ class SlidokuGame {
                     tile.classList.add('light-text');
                 }
 
-                if (i === this.fixedTile.row && j === this.fixedTile.col) {
+                // Check if this position is a fixed tile
+                if (this.fixedTiles.some(fixed => fixed.row === i && fixed.col === j)) {
                     tile.classList.add('fixed');
                 }
 
