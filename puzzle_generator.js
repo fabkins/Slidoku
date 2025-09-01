@@ -1,5 +1,5 @@
 class SlidokuPuzzleGenerator {
-    static generatePuzzle(options = {dontShuffleOneEdge: false, numberOfFixedTiles: 2, allowReavealing: false}) {
+    static generatePuzzle(options = {dontShuffleOneEdge: false, numberOfFixedTiles: 2, allowRevealing: false}) {
         const size = 4;
         const board = this.generateBoard(size);
         const fixedTiles = this.randomizeFixedTiles(board, options.numberOfFixedTiles);
