@@ -2,6 +2,7 @@ class SlidokuPuzzleGenerator {
     static generatePuzzle(date, difficulty) {
         const options = { dontShuffleOneEdge: false, numberOfFixedTiles: 2, allowRevealing: true }
         options.gameDifficulty = difficulty;
+        options.puzzleNumber = Math.floor(Math.random() * 10000); // Random puzzle number
         switch (difficulty) {
             case "Easy":
                 options.numberOfFixedTiles = 1;
@@ -34,6 +35,7 @@ class SlidokuPuzzleGenerator {
             emptyTile: shuffledBoard.emptyTile,
             allowRevealing: options.allowRevealing,
             gameDifficulty: options.gameDifficulty,
+            puzzleNumber: options.puzzleNumber,
             targetSum: 30
         };
     }

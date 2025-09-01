@@ -100,7 +100,7 @@ class SlidokuGame {
         this.resetGame();
 
         // Get a new puzzle from the generator
-        const puzzle = SlidokuPuzzleGenerator.generatePuzzle("placeholder", "Medium" );
+        const puzzle = SlidokuPuzzleGenerator.generatePuzzle("placeholder", "Hard" );
 
         // Set up the game state from the puzzle
         this.board = puzzle.initialBoard;
@@ -111,11 +111,22 @@ class SlidokuGame {
         this.targetSum = puzzle.targetSum;
         this.allowRevealing = puzzle.allowRevealing;
         this.gameDifficulty = puzzle.gameDifficulty;
+        this.puzzleNumber = puzzle.puzzleNumber;
 
         // Update reveal button state based on allowRevealing
         const revealButton = document.getElementById('showTarget');
         if (revealButton) {
             revealButton.disabled = !this.allowRevealing;
+        }
+
+        // Update difficulty and puzzle number displays
+        const difficultySpan = document.getElementById('gameDifficulty');
+        const puzzleNumberSpan = document.getElementById('puzzleNumber');
+        if (difficultySpan) {
+            difficultySpan.textContent = this.gameDifficulty;
+        }
+        if (puzzleNumberSpan) {
+            puzzleNumberSpan.textContent = this.puzzleNumber;
         }
 
         this.renderBoard();
