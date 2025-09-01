@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,12 +11,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div class="container">
         <h1><span style="font-family: 'Lora', serif; font-style: italic;">Slidoku</span></h1>
         <div class="game-info">
             <div class="target-sums">
                 <div>Target Sum: <span id="targetSum">30</span></div>
+                <div>Difficulty: <span id="gameDifficulty">Medium</span></div>
+            </div>
+            <div class="gameDifficulty">
             </div>
             <div class="game-buttons">
                 <button id="newGame">New Game</button>
@@ -43,14 +48,16 @@
             <div class="modal-content">
                 <span class="close">&times;</span>
                 <h2>How to Play</h2>
-                <p>This is a sliding block puzzle where each row and column needs to add up to 30. The 0 tile represents the empty space, and you can slide any adjacent piece into it.</p>
+                <p>This is a sliding block puzzle where each row and column needs to add up to 30. The 0 tile represents
+                    the empty space, and you can slide any adjacent piece into it.</p>
                 <p>Look for these visual cues:</p>
                 <p>• Tiles with a green border are in their correct final position<br>
-                   • Yellow tiles are fixed and cannot be moved</p>
+                    • Yellow tiles are fixed and cannot be moved</p>
             </div>
         </div>
     </div>
     <script src="puzzle_generator.js"></script>
     <script src="game_fixed.js"></script>
 </body>
+
 </html>

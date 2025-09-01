@@ -110,6 +110,7 @@ class SlidokuGame {
         this.size = puzzle.size;
         this.targetSum = puzzle.targetSum;
         this.allowRevealing = puzzle.allowRevealing;
+        this.gameDifficulty = puzzle.gameDifficulty;
 
         // Update reveal button state based on allowRevealing
         const revealButton = document.getElementById('showTarget');
