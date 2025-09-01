@@ -92,12 +92,14 @@ class SlidokuGame {
         console.log('Target sum set to:', this.targetSum);
     }
 
-    initializeGame() {
+    initializeGame(dontShuffleOneEdge = false) {
         console.log('Initializing game...');
         this.resetGame();
         
         // Get a new puzzle from the generator
-        const puzzle = SlidokuPuzzleGenerator.generatePuzzle();
+        const puzzle = SlidokuPuzzleGenerator.generatePuzzle({
+            dontShuffleOneEdge: dontShuffleOneEdge
+        });
         
         // Set up the game state from the puzzle
         this.board = puzzle.initialBoard;
@@ -209,220 +211,157 @@ class SlidokuGame {
     }
 
 
-    generateBoard() {
-        console.log('Generating board...');
-        const MAGIC_SEEDS = [
-            [
-                [15, 1, 2, 12],
-                [4, 10, 9, 7],
-                [8, 6, 5, 11],
-                [3, 13, 14, 0]
-            ],
-            [
-                [14, 0, 3, 13],
-                [1, 15, 12, 2],
-                [9, 7, 10, 4],
-                [6, 8, 5, 11]
-            ],
-            [
-                [13, 3, 0, 14],
-                [2, 12, 15, 1],
-                [4, 10, 7, 9],
-                [11, 5, 8, 6]
-            ],
-            [
-                [11, 5, 8, 6],
-                [4, 10, 7, 9],
-                [2, 12, 15, 1],
-                [13, 3, 0, 14]
-            ],
-            [
-                [9, 7, 4, 10],
-                [6, 8, 11, 5],
-                [15, 1, 2, 12],
-                [0, 14, 13, 3]
-            ],
+    // generateBoard() {
+    //     console.log('Generating board...');
+    //     const MAGIC_SEEDS = [
+    //         [
+    //             [15, 1, 2, 12],
+    //             [4, 10, 9, 7],
+    //             [8, 6, 5, 11],
+    //             [3, 13, 14, 0]
+    //         ],
+    //         [
+    //             [14, 0, 3, 13],
+    //             [1, 15, 12, 2],
+    //             [9, 7, 10, 4],
+    //             [6, 8, 5, 11]
+    //         ],
+    //         [
+    //             [13, 3, 0, 14],
+    //             [2, 12, 15, 1],
+    //             [4, 10, 7, 9],
+    //             [11, 5, 8, 6]
+    //         ],
+    //         [
+    //             [11, 5, 8, 6],
+    //             [4, 10, 7, 9],
+    //             [2, 12, 15, 1],
+    //             [13, 3, 0, 14]
+    //         ],
+    //         [
+    //             [9, 7, 4, 10],
+    //             [6, 8, 11, 5],
+    //             [15, 1, 2, 12],
+    //             [0, 14, 13, 3]
+    //         ],
 
-        ];
-        // Base 4x4 magic square (rows/cols sum = 30 with 0–15)
-        // let magicSquare = [
-        //     [15, 1, 2, 12],
-        //     [4, 10, 9, 7],
-        //     [8, 6, 5, 11],
-        //     [3, 13, 14, 0]
-        // ];
+    //     ];
+    //     // Base 4x4 magic square (rows/cols sum = 30 with 0–15)
+    //     // let magicSquare = [
+    //     //     [15, 1, 2, 12],
+    //     //     [4, 10, 9, 7],
+    //     //     [8, 6, 5, 11],
+    //     //     [3, 13, 14, 0]
+    //     // ];
 
-        // Run routine that validates that the magic square seeds are valid, ensuring all numbers 0-15 are present
-        // that each row adds up to 30 and each column adds up to 30
+    //     // Run routine that validates that the magic square seeds are valid, ensuring all numbers 0-15 are present
+    //     // that each row adds up to 30 and each column adds up to 30
 
-        const isValidMagicSquare = (square) => {
-            const size = square.length;
-            const magicSum = 30;
+    //     const isValidMagicSquare = (square) => {
+    //         const size = square.length;
+    //         const magicSum = 30;
 
-            // Check if all numbers 0-15 are present exactly once
-            const numbers = new Set();
-            for (let i = 0; i < size; i++) {
-                for (let j = 0; j < size; j++) {
-                    const num = square[i][j];
-                    // Check if number is in valid range
-                    if (num < 0 || num > 15) return false;
-                    // Check if number is already seen
-                    if (numbers.has(num)) return false;
-                    numbers.add(num);
-                }
-            }
-            // Check if all numbers 0-15 are present
-            if (numbers.size !== 16) return false;
+    //         // Check if all numbers 0-15 are present exactly once
+    //         const numbers = new Set();
+    //         for (let i = 0; i < size; i++) {
+    //             for (let j = 0; j < size; j++) {
+    //                 const num = square[i][j];
+    //                 // Check if number is in valid range
+    //                 if (num < 0 || num > 15) return false;
+    //                 // Check if number is already seen
+    //                 if (numbers.has(num)) return false;
+    //                 numbers.add(num);
+    //             }
+    //         }
+    //         // Check if all numbers 0-15 are present
+    //         if (numbers.size !== 16) return false;
 
-            // Check rows
-            for (let i = 0; i < size; i++) {
-                const rowSum = square[i].reduce((a, b) => a + b, 0);
-                if (rowSum !== magicSum) return false;
-            }
+    //         // Check rows
+    //         for (let i = 0; i < size; i++) {
+    //             const rowSum = square[i].reduce((a, b) => a + b, 0);
+    //             if (rowSum !== magicSum) return false;
+    //         }
 
-            // Check columns
-            for (let j = 0; j < size; j++) {
-                const colSum = square.reduce((a, b) => a + b[j], 0);
-                if (colSum !== magicSum) return false;
-            }
+    //         // Check columns
+    //         for (let j = 0; j < size; j++) {
+    //             const colSum = square.reduce((a, b) => a + b[j], 0);
+    //             if (colSum !== magicSum) return false;
+    //         }
 
-            return true;
-        };
-        for (const seed of MAGIC_SEEDS) {
-            if (isValidMagicSquare(seed)) {
-                console.log('Valid magic square found:', seed);
-            }
-            else {
-                // log the invalid magic square
-                console.log('Invalid magic square found:', seed);
-            }
-        }
+    //         return true;
+    //     };
+    //     for (const seed of MAGIC_SEEDS) {
+    //         if (isValidMagicSquare(seed)) {
+    //             console.log('Valid magic square found:', seed);
+    //         }
+    //         else {
+    //             // log the invalid magic square
+    //             console.log('Invalid magic square found:', seed);
+    //         }
+    //     }
 
-        let magicSquare = MAGIC_SEEDS[Math.floor(Math.random() * MAGIC_SEEDS.length)]
-            .map(row => [...row]);
+    //     let magicSquare = MAGIC_SEEDS[Math.floor(Math.random() * MAGIC_SEEDS.length)]
+    //         .map(row => [...row]);
 
-        // Helper: rotate 90 degrees
-        const rotate90 = (grid) => {
-            const n = grid.length;
-            let newGrid = Array(n).fill().map(() => Array(n).fill(0));
-            for (let i = 0; i < n; i++) {
-                for (let j = 0; j < n; j++) {
-                    newGrid[j][n - i - 1] = grid[i][j];
-                }
-            }
-            return newGrid;
-        };
+    //     // Helper: rotate 90 degrees
+    //     const rotate90 = (grid) => {
+    //         const n = grid.length;
+    //         let newGrid = Array(n).fill().map(() => Array(n).fill(0));
+    //         for (let i = 0; i < n; i++) {
+    //             for (let j = 0; j < n; j++) {
+    //                 newGrid[j][n - i - 1] = grid[i][j];
+    //             }
+    //         }
+    //         return newGrid;
+    //     };
 
-        // Helper: reflect horizontally
-        const reflectH = (grid) => grid.map(row => [...row].reverse());
+    //     // Helper: reflect horizontally
+    //     const reflectH = (grid) => grid.map(row => [...row].reverse());
 
-        // Apply random symmetries
-        let r = Math.floor(Math.random() * 4); // 0–3 rotations
-        for (let i = 0; i < r; i++) {
-            magicSquare = rotate90(magicSquare);
-        }
-        if (Math.random() < 0.5) {
-            magicSquare = reflectH(magicSquare);
-        }
+    //     // Apply random symmetries
+    //     let r = Math.floor(Math.random() * 4); // 0–3 rotations
+    //     for (let i = 0; i < r; i++) {
+    //         magicSquare = rotate90(magicSquare);
+    //     }
+    //     if (Math.random() < 0.5) {
+    //         magicSquare = reflectH(magicSquare);
+    //     }
 
-        // Random row swaps (within pairs)
-        if (Math.random() < 0.5) [magicSquare[0], magicSquare[1]] = [magicSquare[1], magicSquare[0]];
-        if (Math.random() < 0.5) [magicSquare[2], magicSquare[3]] = [magicSquare[3], magicSquare[2]];
+    //     // Random row swaps (within pairs)
+    //     if (Math.random() < 0.5) [magicSquare[0], magicSquare[1]] = [magicSquare[1], magicSquare[0]];
+    //     if (Math.random() < 0.5) [magicSquare[2], magicSquare[3]] = [magicSquare[3], magicSquare[2]];
 
-        // Random column swaps (within pairs)
-        if (Math.random() < 0.5) {
-            for (let i = 0; i < 4; i++) {
-                [magicSquare[i][0], magicSquare[i][1]] = [magicSquare[i][1], magicSquare[i][0]];
-            }
-        }
-        if (Math.random() < 0.5) {
-            for (let i = 0; i < 4; i++) {
-                [magicSquare[i][2], magicSquare[i][3]] = [magicSquare[i][3], magicSquare[i][2]];
-            }
-        }
+    //     // Random column swaps (within pairs)
+    //     if (Math.random() < 0.5) {
+    //         for (let i = 0; i < 4; i++) {
+    //             [magicSquare[i][0], magicSquare[i][1]] = [magicSquare[i][1], magicSquare[i][0]];
+    //         }
+    //     }
+    //     if (Math.random() < 0.5) {
+    //         for (let i = 0; i < 4; i++) {
+    //             [magicSquare[i][2], magicSquare[i][3]] = [magicSquare[i][3], magicSquare[i][2]];
+    //         }
+    //     }
 
-        // Save this as our target state first
-        this.targetState = magicSquare.map(row => [...row]);
+    //     // Save this as our target state first
+    //     this.targetState = magicSquare.map(row => [...row]);
 
-        // Then create our game board from it
-        this.board = magicSquare.map(row => [...row]);
+    //     // Then create our game board from it
+    //     this.board = magicSquare.map(row => [...row]);
 
-        // Find the empty tile (0)
-        for (let i = 0; i < this.size; i++) {
-            for (let j = 0; j < this.size; j++) {
-                if (magicSquare[i][j] === 0) {
-                    this.emptyTile = { row: i, col: j };
-                    break;
-                }
-            }
-        }
+    //     // Find the empty tile (0)
+    //     for (let i = 0; i < this.size; i++) {
+    //         for (let j = 0; j < this.size; j++) {
+    //             if (magicSquare[i][j] === 0) {
+    //                 this.emptyTile = { row: i, col: j };
+    //                 break;
+    //             }
+    //         }
+    //     }
 
-        console.log('Target state:', this.targetState);
-        console.log('Initial board:', this.board);
-    }
-
-
-
-
-    shuffleBoard(moves = 1000, dontShuffleOneEdge = false) {
-        console.log(`Shuffling board with ${moves} random moves... ${dontShuffleOneEdge ? 'One edge preserved' : ''}`);
-        let lastMoved = null; // Keep track of the last tile we moved
-        
-        // Determine which edge to preserve (the one without the empty tile)
-        let edgeToPreserve = null;
-        if (dontShuffleOneEdge) {
-            if (this.emptyTile.row !== 0) edgeToPreserve = 0; // preserve top edge
-            else if (this.emptyTile.row !== this.size - 1) edgeToPreserve = this.size - 1; // preserve bottom edge
-            else if (this.emptyTile.col !== 0) edgeToPreserve = -1; // preserve left edge (-1 means left)
-            else edgeToPreserve = -2; // preserve right edge (-2 means right)
-        }
-
-        for (let i = 0; i < moves; i++) {
-            const { row, col } = this.emptyTile;
-
-            // Find valid neighbors (tiles adjacent to empty)
-            let neighbors = [];
-            if (row > 0) neighbors.push([row - 1, col]); // up
-            if (row < this.size - 1) neighbors.push([row + 1, col]); // down
-            if (col > 0) neighbors.push([row, col - 1]); // left
-            if (col < this.size - 1) neighbors.push([row, col + 1]); // right
-
-            // Filter out any fixed tiles (cannot be moved)
-            neighbors = neighbors.filter(([r, c]) =>
-                !this.fixedTiles.some(fixed => fixed.row === r && fixed.col === c));
-
-            // If dontShuffleOneEdge is true, don't allow moving tiles from the preserved edge
-            if (dontShuffleOneEdge && edgeToPreserve !== null) {
-                if (edgeToPreserve >= 0) { // top or bottom edge
-                    neighbors = neighbors.filter(([r, c]) => r !== edgeToPreserve);
-                } else if (edgeToPreserve === -1) { // left edge
-                    neighbors = neighbors.filter(([r, c]) => c !== 0);
-                } else { // right edge
-                    neighbors = neighbors.filter(([r, c]) => c !== this.size - 1);
-                }
-            }
-
-            // Filter out the last moved tile if we have other options
-            if (lastMoved && neighbors.length > 1) {
-                const betterNeighbors = neighbors.filter(([r, c]) =>
-                    !(r === lastMoved[0] && c === lastMoved[1]));
-                if (betterNeighbors.length > 0) {
-                    neighbors = betterNeighbors;
-                }
-            }
-
-            if (neighbors.length === 0) continue; // rare edge case
-
-            // Pick a random valid neighbor and swap with the empty tile
-            const [r2, c2] = neighbors[Math.floor(Math.random() * neighbors.length)];
-            lastMoved = [row, col]; // Remember where the empty tile was
-            this.swapTiles(row, col, r2, c2, false);
-        }
-
-        this.moves = 0;
-        console.log("Board shuffled:", this.board);
-    }
-
+    //     console.log('Target state:', this.targetState);
+    //     console.log('Initial board:', this.board);
+    // }
 
 
     renderBoard() {
@@ -597,124 +536,124 @@ class SlidokuGame {
         }
     }
 
-    findBestMove() {
-        console.log('Finding best move. Empty tile at:', this.emptyTile);
+    // findBestMove() {
+    //     console.log('Finding best move. Empty tile at:', this.emptyTile);
 
-        // Generate target state if not exists
-        if (!this.targetState) {
-            this.generateTargetState();
-        }
+    //     // Generate target state if not exists
+    //     if (!this.targetState) {
+    //         this.generateTargetState();
+    //     }
 
-        const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]]; // up, down, left, right
-        let bestMove = null;
-        let bestScore = -Infinity;
+    //     const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]]; // up, down, left, right
+    //     let bestMove = null;
+    //     let bestScore = -Infinity;
 
-        // Clear move history if it's getting too large
-        if (this.moveHistory.size > 20) {
-            this.moveHistory.clear();
-        }
+    //     // Clear move history if it's getting too large
+    //     if (this.moveHistory.size > 20) {
+    //         this.moveHistory.clear();
+    //     }
 
-        for (const [dx, dy] of directions) {
-            const newRow = this.emptyTile.row + dx;
-            const newCol = this.emptyTile.col + dy;
+    //     for (const [dx, dy] of directions) {
+    //         const newRow = this.emptyTile.row + dx;
+    //         const newCol = this.emptyTile.col + dy;
 
-            if (newRow >= 0 && newRow < this.size &&
-                newCol >= 0 && newCol < this.size &&
-                !(newRow === this.fixedTile.row && newCol === this.fixedTile.col)) {
+    //         if (newRow >= 0 && newRow < this.size &&
+    //             newCol >= 0 && newCol < this.size &&
+    //             !(newRow === this.fixedTile.row && newCol === this.fixedTile.col)) {
 
-                // Check if this move would create a loop
-                const moveKey = `${newRow},${newCol}`;
-                if (this.moveHistory.has(moveKey)) {
-                    continue;
-                }
+    //             // Check if this move would create a loop
+    //             const moveKey = `${newRow},${newCol}`;
+    //             if (this.moveHistory.has(moveKey)) {
+    //                 continue;
+    //             }
 
-                // Try the move
-                const originalValue = this.board[newRow][newCol];
-                this.board[newRow][newCol] = 0;
-                this.board[this.emptyTile.row][this.emptyTile.col] = originalValue;
+    //             // Try the move
+    //             const originalValue = this.board[newRow][newCol];
+    //             this.board[newRow][newCol] = 0;
+    //             this.board[this.emptyTile.row][this.emptyTile.col] = originalValue;
 
-                const score = this.calculateMoveScore(originalValue, newRow, newCol);
+    //             const score = this.calculateMoveScore(originalValue, newRow, newCol);
 
-                // Undo the move
-                this.board[this.emptyTile.row][this.emptyTile.col] = 0;
-                this.board[newRow][newCol] = originalValue;
+    //             // Undo the move
+    //             this.board[this.emptyTile.row][this.emptyTile.col] = 0;
+    //             this.board[newRow][newCol] = originalValue;
 
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestMove = { row: newRow, col: newCol };
-                }
-            }
-        }
+    //             if (score > bestScore) {
+    //                 bestScore = score;
+    //                 bestMove = { row: newRow, col: newCol };
+    //             }
+    //         }
+    //     }
 
-        // Add chosen move to history
-        if (bestMove) {
-            this.moveHistory.add(`${bestMove.row},${bestMove.col}`);
-        }
+    //     // Add chosen move to history
+    //     if (bestMove) {
+    //         this.moveHistory.add(`${bestMove.row},${bestMove.col}`);
+    //     }
 
-        console.log('Best move found:', bestMove);
-        return bestMove;
-    }
+    //     console.log('Best move found:', bestMove);
+    //     return bestMove;
+    // }
 
-    generateTargetState() {
-        // Create an ideal arrangement where sums are closest to target
-        let numbers = Array.from({ length: 15 }, (_, i) => i + 1).filter(n => n !== 8);
-        numbers.sort((a, b) => a - b);
+    // generateTargetState() {
+    //     // Create an ideal arrangement where sums are closest to target
+    //     let numbers = Array.from({ length: 15 }, (_, i) => i + 1).filter(n => n !== 8);
+    //     numbers.sort((a, b) => a - b);
 
-        this.targetState = Array(this.size).fill().map(() => Array(this.size).fill(0));
-        let small = 0;
-        let large = numbers.length - 1;
+    //     this.targetState = Array(this.size).fill().map(() => Array(this.size).fill(0));
+    //     let small = 0;
+    //     let large = numbers.length - 1;
 
-        // Distribute numbers to balance row and column sums
-        for (let i = 0; i < this.size; i++) {
-            for (let j = 0; j < this.size; j++) {
-                if (i === this.fixedTile.row && j === this.fixedTile.col) {
-                    this.targetState[i][j] = 8;
-                } else if (i === this.emptyTile.row && j === this.emptyTile.col) {
-                    this.targetState[i][j] = 0;
-                } else {
-                    // Alternate between small and large numbers to balance sums
-                    this.targetState[i][j] = (i + j) % 2 === 0 ? numbers[small++] : numbers[large--];
-                }
-            }
-        }
-        console.log('Target state generated:', this.targetState);
-    }
+    //     // Distribute numbers to balance row and column sums
+    //     for (let i = 0; i < this.size; i++) {
+    //         for (let j = 0; j < this.size; j++) {
+    //             if (i === this.fixedTile.row && j === this.fixedTile.col) {
+    //                 this.targetState[i][j] = 8;
+    //             } else if (i === this.emptyTile.row && j === this.emptyTile.col) {
+    //                 this.targetState[i][j] = 0;
+    //             } else {
+    //                 // Alternate between small and large numbers to balance sums
+    //                 this.targetState[i][j] = (i + j) % 2 === 0 ? numbers[small++] : numbers[large--];
+    //             }
+    //         }
+    //     }
+    //     console.log('Target state generated:', this.targetState);
+    // }
 
-    calculateMoveScore(value, newRow, newCol) {
-        let score = 0;
+    // calculateMoveScore(value, newRow, newCol) {
+    //     let score = 0;
 
-        // 1. Distance to target position
-        if (this.targetState) {
-            const targetPos = this.findTargetPosition(value);
-            if (targetPos) {
-                score -= (Math.abs(targetPos.row - newRow) + Math.abs(targetPos.col - newCol));
-            }
-        }
+    //     // 1. Distance to target position
+    //     if (this.targetState) {
+    //         const targetPos = this.findTargetPosition(value);
+    //         if (targetPos) {
+    //             score -= (Math.abs(targetPos.row - newRow) + Math.abs(targetPos.col - newCol));
+    //         }
+    //     }
 
-        // 2. Row and column sum improvements
-        const rowSum = this.board[newRow].reduce((sum, val) => sum + val, 0);
-        const colSum = this.board.reduce((sum, row) => sum + row[newCol], 0);
-        score -= Math.abs(rowSum - this.targetSum) + Math.abs(colSum - this.targetSum);
+    //     // 2. Row and column sum improvements
+    //     const rowSum = this.board[newRow].reduce((sum, val) => sum + val, 0);
+    //     const colSum = this.board.reduce((sum, row) => sum + row[newCol], 0);
+    //     score -= Math.abs(rowSum - this.targetSum) + Math.abs(colSum - this.targetSum);
 
-        // 3. Penalty for recent moves to avoid loops
-        const moveKey = `${newRow},${newCol}`;
-        if (this.moveHistory.has(moveKey)) {
-            score -= 1000;
-        }
+    //     // 3. Penalty for recent moves to avoid loops
+    //     const moveKey = `${newRow},${newCol}`;
+    //     if (this.moveHistory.has(moveKey)) {
+    //         score -= 1000;
+    //     }
 
-        return score;
-    }
+    //     return score;
+    // }
 
-    findTargetPosition(value) {
-        for (let i = 0; i < this.size; i++) {
-            for (let j = 0; j < this.size; j++) {
-                if (this.targetState[i][j] === value) {
-                    return { row: i, col: j };
-                }
-            }
-        }
-        return null;
-    }
+    // findTargetPosition(value) {
+    //     for (let i = 0; i < this.size; i++) {
+    //         for (let j = 0; j < this.size; j++) {
+    //             if (this.targetState[i][j] === value) {
+    //                 return { row: i, col: j };
+    //             }
+    //         }
+    //     }
+    //     return null;
+    // }
 
     getMovableTiles(clickedRow, clickedCol) {
         const tiles = [];
@@ -801,7 +740,7 @@ class SlidokuGame {
         if (newGameButton) {
             newGameButton.addEventListener('click', () => {
                 console.log('New game clicked');
-                this.initializeGame();
+                this.initializeGame(true); // Always preserve one edge in new games
             });
         } else {
             console.error('New game button not found');

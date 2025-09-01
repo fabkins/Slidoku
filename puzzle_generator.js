@@ -1,9 +1,9 @@
 class SlidokuPuzzleGenerator {
-    static generatePuzzle() {
+    static generatePuzzle(options = {}) {
         const size = 4;
         const board = this.generateBoard(size);
         const fixedTiles = this.randomizeFixedTiles(board, 1);
-        const shuffledBoard = this.shuffleBoard(board, fixedTiles);
+        const shuffledBoard = this.shuffleBoard(board, fixedTiles, 1000, options.dontShuffleOneEdge);
         
         // Create the puzzle object
         return {
@@ -139,13 +139,22 @@ class SlidokuPuzzleGenerator {
         return fixedTiles;
     }
 
-    static shuffleBoard(boardState, fixedTiles, moves = 1000) {
+    static shuffleBoard(boardState, fixedTiles, moves = 1000, dontShuffleOneEdge = false) {
         const board = boardState.board.map(row => [...row]);
         let emptyTile = { ...boardState.emptyTile };
 
         // Helper function to check if a tile is fixed
         const isFixed = (row, col) => 
             fixedTiles.some(tile => tile.row === row && tile.col === col);
+
+        // Determine which edge to preserve (the one without the empty tile)
+        let edgeToPreserve = null;
+        if (dontShuffleOneEdge) {
+            if (emptyTile.row !== 0) edgeToPreserve = 0; // preserve top edge
+            else if (emptyTile.row !== board.length - 1) edgeToPreserve = board.length - 1; // preserve bottom edge
+            else if (emptyTile.col !== 0) edgeToPreserve = -1; // preserve left edge (-1 means left)
+            else edgeToPreserve = -2; // preserve right edge (-2 means right)
+        }
 
         let lastMoved = null;
         for (let i = 0; i < moves; i++) {
@@ -158,8 +167,21 @@ class SlidokuPuzzleGenerator {
             if (col > 0) neighbors.push([row, col - 1]);
             if (col < board[0].length - 1) neighbors.push([row, col + 1]);
 
-            // Filter out fixed tiles and last moved tile
+            // Filter out fixed tiles
             neighbors = neighbors.filter(([r, c]) => !isFixed(r, c));
+
+            // Filter out tiles from preserved edge if dontShuffleOneEdge is true
+            if (dontShuffleOneEdge && edgeToPreserve !== null) {
+                if (edgeToPreserve >= 0) { // top or bottom edge
+                    neighbors = neighbors.filter(([r, c]) => r !== edgeToPreserve);
+                } else if (edgeToPreserve === -1) { // left edge
+                    neighbors = neighbors.filter(([r, c]) => c !== 0);
+                } else { // right edge
+                    neighbors = neighbors.filter(([r, c]) => c !== board.length - 1);
+                }
+            }
+
+            // Filter out the last moved tile if we have other options
             if (lastMoved && neighbors.length > 1) {
                 const betterNeighbors = neighbors.filter(([r, c]) =>
                     !(r === lastMoved[0] && c === lastMoved[1]));
