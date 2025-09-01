@@ -74,7 +74,7 @@ class SlidokuGame {
         this.fixedTiles = []; // Initialize empty array first
         this.generateBoard();
         this.randomizeFixedTiles(1); // Start with 2 fixed tiles
-        this.shuffleBoard(1000,true);
+        this.shuffleBoard(1000, true);
         this.renderBoard();
         this.updateSums();
     }
@@ -82,14 +82,14 @@ class SlidokuGame {
     randomizeFixedTiles(numFixedTiles = 2) {
         // Center 4 positions are at (1,1), (1,2), (2,1), and (2,2)
         const centerPositions = [
-            {row: 1, col: 1},
-            {row: 1, col: 2},
-            {row: 2, col: 1},
-            {row: 2, col: 2}
+            { row: 1, col: 1 },
+            { row: 1, col: 2 },
+            { row: 2, col: 1 },
+            { row: 2, col: 2 }
         ];
 
         // Filter out the position with the empty tile (0)
-        const validPositions = centerPositions.filter(pos => 
+        const validPositions = centerPositions.filter(pos =>
             this.board[pos.row][pos.col] !== 0);
 
         // Clear existing fixed tiles
@@ -101,7 +101,7 @@ class SlidokuGame {
             const position = validPositions.splice(randomIndex, 1)[0];
             this.fixedTiles.push(position);
         }
-        
+
         // Re-render the board to show the new fixed tile positions
         this.renderBoard();
         console.log('Fixed tiles randomized to:', this.fixedTiles);
@@ -176,7 +176,7 @@ class SlidokuGame {
         return true;
     }
 
-    
+
     generateBoard() {
         console.log('Generating board...');
         const MAGIC_SEEDS = [
@@ -185,7 +185,7 @@ class SlidokuGame {
                 [4, 10, 9, 7],
                 [8, 6, 5, 11],
                 [3, 13, 14, 0]
-            ],        
+            ],
             [
                 [14, 0, 3, 13],
                 [1, 15, 12, 2],
@@ -260,7 +260,7 @@ class SlidokuGame {
             if (isValidMagicSquare(seed)) {
                 console.log('Valid magic square found:', seed);
             }
-            else{
+            else {
                 // log the invalid magic square
                 console.log('Invalid magic square found:', seed);
             }
@@ -332,7 +332,7 @@ class SlidokuGame {
 
 
 
-    shuffleBoard(moves = 1000, dontshuffleOneEdge=false) {
+    shuffleBoard(moves = 1000, dontshuffleOneEdge = false) {
         console.log(`Shuffling board with ${moves} random moves...`);
         let lastMoved = null; // Keep track of the last tile we moved
 
@@ -347,12 +347,12 @@ class SlidokuGame {
             if (col < this.size - 1) neighbors.push([row, col + 1]); // right
 
             // Filter out any fixed tiles (cannot be moved)
-            neighbors = neighbors.filter(([r, c]) => 
+            neighbors = neighbors.filter(([r, c]) =>
                 !this.fixedTiles.some(fixed => fixed.row === r && fixed.col === c));
 
             // Filter out the last moved tile if we have other options
             if (lastMoved && neighbors.length > 1) {
-                const betterNeighbors = neighbors.filter(([r, c]) => 
+                const betterNeighbors = neighbors.filter(([r, c]) =>
                     !(r === lastMoved[0] && c === lastMoved[1]));
                 if (betterNeighbors.length > 0) {
                     neighbors = betterNeighbors;
@@ -367,6 +367,7 @@ class SlidokuGame {
             this.swapTiles(row, col, r2, c2, false);
         }
 
+        this.moves = 0;
         console.log("Board shuffled:", this.board);
     }
 
