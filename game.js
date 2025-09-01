@@ -215,7 +215,7 @@ class SlidokiGame {
         };
     }
 
-    initializeGame(date = new Date().toISOString().split('T')[0], difficulty = "Medium") {
+    initializeGame(date = new Date().toISOString().split('T')[0], difficulty = "Easy") {
         console.log('Initializing game with date:', date, 'difficulty:', difficulty);
         this.resetGame();
         
