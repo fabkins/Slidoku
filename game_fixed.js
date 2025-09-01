@@ -23,7 +23,6 @@ class SlidokuGame {
     init() {
         console.log('Running init...');
         try {
-            this.calculateTargetSum();
             this.initializeGame(true);
             this.setupEventListeners();
             this.setupModal();
@@ -86,13 +85,6 @@ class SlidokuGame {
                 instructionsModal.style.display = 'none';
             }
         };
-    }
-
-    calculateTargetSum() {
-        // For a 4x4 magic square, the sum is always 30
-        this.targetSum = 30;
-        document.getElementById('targetSum').textContent = this.targetSum;
-        console.log('Target sum set to:', this.targetSum);
     }
 
     initializeGame() {
