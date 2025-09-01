@@ -95,12 +95,12 @@ class SlidokuGame {
     initializeGame(dontShuffleOneEdge = false) {
         console.log('Initializing game...');
         this.resetGame();
-        
+
         // Get a new puzzle from the generator
         const puzzle = SlidokuPuzzleGenerator.generatePuzzle({
             dontShuffleOneEdge: dontShuffleOneEdge
         });
-        
+
         // Set up the game state from the puzzle
         this.board = puzzle.initialBoard;
         this.targetState = puzzle.targetBoard;
@@ -108,7 +108,7 @@ class SlidokuGame {
         this.emptyTile = puzzle.emptyTile;
         this.size = puzzle.size;
         this.targetSum = puzzle.targetSum;
-        
+
         this.renderBoard();
         this.updateSums();
     }
@@ -209,160 +209,6 @@ class SlidokuGame {
 
         return true;
     }
-
-
-    // generateBoard() {
-    //     console.log('Generating board...');
-    //     const MAGIC_SEEDS = [
-    //         [
-    //             [15, 1, 2, 12],
-    //             [4, 10, 9, 7],
-    //             [8, 6, 5, 11],
-    //             [3, 13, 14, 0]
-    //         ],
-    //         [
-    //             [14, 0, 3, 13],
-    //             [1, 15, 12, 2],
-    //             [9, 7, 10, 4],
-    //             [6, 8, 5, 11]
-    //         ],
-    //         [
-    //             [13, 3, 0, 14],
-    //             [2, 12, 15, 1],
-    //             [4, 10, 7, 9],
-    //             [11, 5, 8, 6]
-    //         ],
-    //         [
-    //             [11, 5, 8, 6],
-    //             [4, 10, 7, 9],
-    //             [2, 12, 15, 1],
-    //             [13, 3, 0, 14]
-    //         ],
-    //         [
-    //             [9, 7, 4, 10],
-    //             [6, 8, 11, 5],
-    //             [15, 1, 2, 12],
-    //             [0, 14, 13, 3]
-    //         ],
-
-    //     ];
-    //     // Base 4x4 magic square (rows/cols sum = 30 with 0–15)
-    //     // let magicSquare = [
-    //     //     [15, 1, 2, 12],
-    //     //     [4, 10, 9, 7],
-    //     //     [8, 6, 5, 11],
-    //     //     [3, 13, 14, 0]
-    //     // ];
-
-    //     // Run routine that validates that the magic square seeds are valid, ensuring all numbers 0-15 are present
-    //     // that each row adds up to 30 and each column adds up to 30
-
-    //     const isValidMagicSquare = (square) => {
-    //         const size = square.length;
-    //         const magicSum = 30;
-
-    //         // Check if all numbers 0-15 are present exactly once
-    //         const numbers = new Set();
-    //         for (let i = 0; i < size; i++) {
-    //             for (let j = 0; j < size; j++) {
-    //                 const num = square[i][j];
-    //                 // Check if number is in valid range
-    //                 if (num < 0 || num > 15) return false;
-    //                 // Check if number is already seen
-    //                 if (numbers.has(num)) return false;
-    //                 numbers.add(num);
-    //             }
-    //         }
-    //         // Check if all numbers 0-15 are present
-    //         if (numbers.size !== 16) return false;
-
-    //         // Check rows
-    //         for (let i = 0; i < size; i++) {
-    //             const rowSum = square[i].reduce((a, b) => a + b, 0);
-    //             if (rowSum !== magicSum) return false;
-    //         }
-
-    //         // Check columns
-    //         for (let j = 0; j < size; j++) {
-    //             const colSum = square.reduce((a, b) => a + b[j], 0);
-    //             if (colSum !== magicSum) return false;
-    //         }
-
-    //         return true;
-    //     };
-    //     for (const seed of MAGIC_SEEDS) {
-    //         if (isValidMagicSquare(seed)) {
-    //             console.log('Valid magic square found:', seed);
-    //         }
-    //         else {
-    //             // log the invalid magic square
-    //             console.log('Invalid magic square found:', seed);
-    //         }
-    //     }
-
-    //     let magicSquare = MAGIC_SEEDS[Math.floor(Math.random() * MAGIC_SEEDS.length)]
-    //         .map(row => [...row]);
-
-    //     // Helper: rotate 90 degrees
-    //     const rotate90 = (grid) => {
-    //         const n = grid.length;
-    //         let newGrid = Array(n).fill().map(() => Array(n).fill(0));
-    //         for (let i = 0; i < n; i++) {
-    //             for (let j = 0; j < n; j++) {
-    //                 newGrid[j][n - i - 1] = grid[i][j];
-    //             }
-    //         }
-    //         return newGrid;
-    //     };
-
-    //     // Helper: reflect horizontally
-    //     const reflectH = (grid) => grid.map(row => [...row].reverse());
-
-    //     // Apply random symmetries
-    //     let r = Math.floor(Math.random() * 4); // 0–3 rotations
-    //     for (let i = 0; i < r; i++) {
-    //         magicSquare = rotate90(magicSquare);
-    //     }
-    //     if (Math.random() < 0.5) {
-    //         magicSquare = reflectH(magicSquare);
-    //     }
-
-    //     // Random row swaps (within pairs)
-    //     if (Math.random() < 0.5) [magicSquare[0], magicSquare[1]] = [magicSquare[1], magicSquare[0]];
-    //     if (Math.random() < 0.5) [magicSquare[2], magicSquare[3]] = [magicSquare[3], magicSquare[2]];
-
-    //     // Random column swaps (within pairs)
-    //     if (Math.random() < 0.5) {
-    //         for (let i = 0; i < 4; i++) {
-    //             [magicSquare[i][0], magicSquare[i][1]] = [magicSquare[i][1], magicSquare[i][0]];
-    //         }
-    //     }
-    //     if (Math.random() < 0.5) {
-    //         for (let i = 0; i < 4; i++) {
-    //             [magicSquare[i][2], magicSquare[i][3]] = [magicSquare[i][3], magicSquare[i][2]];
-    //         }
-    //     }
-
-    //     // Save this as our target state first
-    //     this.targetState = magicSquare.map(row => [...row]);
-
-    //     // Then create our game board from it
-    //     this.board = magicSquare.map(row => [...row]);
-
-    //     // Find the empty tile (0)
-    //     for (let i = 0; i < this.size; i++) {
-    //         for (let j = 0; j < this.size; j++) {
-    //             if (magicSquare[i][j] === 0) {
-    //                 this.emptyTile = { row: i, col: j };
-    //                 break;
-    //             }
-    //         }
-    //     }
-
-    //     console.log('Target state:', this.targetState);
-    //     console.log('Initial board:', this.board);
-    // }
-
 
     renderBoard() {
         const gameBoard = document.querySelector('.game-board');
@@ -471,25 +317,25 @@ class SlidokuGame {
                 // Clone the tile for animation
                 const clone = tile1.cloneNode(true);
                 clone.classList.add('sliding');
-                
+
                 // Calculate the starting position
                 const startX = col1 * (tileSize + gridGap);
                 const startY = row1 * (tileSize + gridGap);
-                
+
                 // Calculate the ending position
                 const endX = col2 * (tileSize + gridGap);
                 const endY = row2 * (tileSize + gridGap);
-                
+
                 // Position the clone absolutely
                 clone.style.position = 'absolute';
                 clone.style.left = `${startX}px`;
                 clone.style.top = `${startY}px`;
                 clone.style.margin = '0';
                 clone.style.zIndex = '1000';
-                
+
                 // Add the clone to the game board
                 gameBoard.appendChild(clone);
-                
+
                 // Start the animation
                 requestAnimationFrame(() => {
                     clone.style.transform = `translate(${endX - startX}px, ${endY - startY}px)`;
@@ -524,137 +370,6 @@ class SlidokuGame {
         }
     }
 
-    showHint() {
-        console.log('ShowHint called');
-        const bestMove = this.findBestMove();
-
-        if (bestMove && bestMove.row !== undefined) {
-            console.log('Moving tile at:', bestMove.row, bestMove.col);
-            this.swapTiles(bestMove.row, bestMove.col, this.emptyTile.row, this.emptyTile.col);
-        } else {
-            console.log('No valid move found');
-        }
-    }
-
-    // findBestMove() {
-    //     console.log('Finding best move. Empty tile at:', this.emptyTile);
-
-    //     // Generate target state if not exists
-    //     if (!this.targetState) {
-    //         this.generateTargetState();
-    //     }
-
-    //     const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]]; // up, down, left, right
-    //     let bestMove = null;
-    //     let bestScore = -Infinity;
-
-    //     // Clear move history if it's getting too large
-    //     if (this.moveHistory.size > 20) {
-    //         this.moveHistory.clear();
-    //     }
-
-    //     for (const [dx, dy] of directions) {
-    //         const newRow = this.emptyTile.row + dx;
-    //         const newCol = this.emptyTile.col + dy;
-
-    //         if (newRow >= 0 && newRow < this.size &&
-    //             newCol >= 0 && newCol < this.size &&
-    //             !(newRow === this.fixedTile.row && newCol === this.fixedTile.col)) {
-
-    //             // Check if this move would create a loop
-    //             const moveKey = `${newRow},${newCol}`;
-    //             if (this.moveHistory.has(moveKey)) {
-    //                 continue;
-    //             }
-
-    //             // Try the move
-    //             const originalValue = this.board[newRow][newCol];
-    //             this.board[newRow][newCol] = 0;
-    //             this.board[this.emptyTile.row][this.emptyTile.col] = originalValue;
-
-    //             const score = this.calculateMoveScore(originalValue, newRow, newCol);
-
-    //             // Undo the move
-    //             this.board[this.emptyTile.row][this.emptyTile.col] = 0;
-    //             this.board[newRow][newCol] = originalValue;
-
-    //             if (score > bestScore) {
-    //                 bestScore = score;
-    //                 bestMove = { row: newRow, col: newCol };
-    //             }
-    //         }
-    //     }
-
-    //     // Add chosen move to history
-    //     if (bestMove) {
-    //         this.moveHistory.add(`${bestMove.row},${bestMove.col}`);
-    //     }
-
-    //     console.log('Best move found:', bestMove);
-    //     return bestMove;
-    // }
-
-    // generateTargetState() {
-    //     // Create an ideal arrangement where sums are closest to target
-    //     let numbers = Array.from({ length: 15 }, (_, i) => i + 1).filter(n => n !== 8);
-    //     numbers.sort((a, b) => a - b);
-
-    //     this.targetState = Array(this.size).fill().map(() => Array(this.size).fill(0));
-    //     let small = 0;
-    //     let large = numbers.length - 1;
-
-    //     // Distribute numbers to balance row and column sums
-    //     for (let i = 0; i < this.size; i++) {
-    //         for (let j = 0; j < this.size; j++) {
-    //             if (i === this.fixedTile.row && j === this.fixedTile.col) {
-    //                 this.targetState[i][j] = 8;
-    //             } else if (i === this.emptyTile.row && j === this.emptyTile.col) {
-    //                 this.targetState[i][j] = 0;
-    //             } else {
-    //                 // Alternate between small and large numbers to balance sums
-    //                 this.targetState[i][j] = (i + j) % 2 === 0 ? numbers[small++] : numbers[large--];
-    //             }
-    //         }
-    //     }
-    //     console.log('Target state generated:', this.targetState);
-    // }
-
-    // calculateMoveScore(value, newRow, newCol) {
-    //     let score = 0;
-
-    //     // 1. Distance to target position
-    //     if (this.targetState) {
-    //         const targetPos = this.findTargetPosition(value);
-    //         if (targetPos) {
-    //             score -= (Math.abs(targetPos.row - newRow) + Math.abs(targetPos.col - newCol));
-    //         }
-    //     }
-
-    //     // 2. Row and column sum improvements
-    //     const rowSum = this.board[newRow].reduce((sum, val) => sum + val, 0);
-    //     const colSum = this.board.reduce((sum, row) => sum + row[newCol], 0);
-    //     score -= Math.abs(rowSum - this.targetSum) + Math.abs(colSum - this.targetSum);
-
-    //     // 3. Penalty for recent moves to avoid loops
-    //     const moveKey = `${newRow},${newCol}`;
-    //     if (this.moveHistory.has(moveKey)) {
-    //         score -= 1000;
-    //     }
-
-    //     return score;
-    // }
-
-    // findTargetPosition(value) {
-    //     for (let i = 0; i < this.size; i++) {
-    //         for (let j = 0; j < this.size; j++) {
-    //             if (this.targetState[i][j] === value) {
-    //                 return { row: i, col: j };
-    //             }
-    //         }
-    //     }
-    //     return null;
-    // }
-
     getMovableTiles(clickedRow, clickedCol) {
         const tiles = [];
         const { row: emptyRow, col: emptyCol } = this.emptyTile;
@@ -668,7 +383,7 @@ class SlidokuGame {
             // Moving horizontally
             const start = Math.min(clickedCol, emptyCol);
             const end = Math.max(clickedCol, emptyCol);
-            
+
             // Check for fixed tiles in between
             for (let col = start; col <= end; col++) {
                 if (this.fixedTiles.some(fixed => fixed.row === clickedRow && fixed.col === col)) {
@@ -682,7 +397,7 @@ class SlidokuGame {
             // Moving vertically
             const start = Math.min(clickedRow, emptyRow);
             const end = Math.max(clickedRow, emptyRow);
-            
+
             // Check for fixed tiles in between
             for (let row = start; row <= end; row++) {
                 if (this.fixedTiles.some(fixed => fixed.row === row && fixed.col === clickedCol)) {
@@ -715,15 +430,15 @@ class SlidokuGame {
 
             const clickedRow = parseInt(tile.dataset.row);
             const clickedCol = parseInt(tile.dataset.col);
-            
+
             // Get all tiles that need to move
             const tilesToMove = this.getMovableTiles(clickedRow, clickedCol);
-            
+
             if (tilesToMove.length > 0) {
                 // Move tiles one by one towards the empty space
                 let currentEmptyRow = this.emptyTile.row;
                 let currentEmptyCol = this.emptyTile.col;
-                
+
                 // Use async/await to handle sequential animations
                 (async () => {
                     for (const { row, col } of tilesToMove) {
