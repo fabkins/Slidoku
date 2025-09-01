@@ -47,8 +47,11 @@ class SlidokuGame {
 
         targetBtn.onclick = () => {
             console.log('Show target clicked');
-            this.renderTargetBoard();
-            targetModal.style.display = 'block';
+            if (this.allowRevealing === true) {
+
+                this.renderTargetBoard();
+                targetModal.style.display = 'block';
+            }
         };
 
         targetSpan.onclick = () => {
