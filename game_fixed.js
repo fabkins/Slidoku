@@ -95,10 +95,18 @@ class SlidokuGame {
     initializeGame() {
         console.log('Initializing game...');
         this.resetGame();
-        this.fixedTiles = []; // Initialize empty array first
-        this.generateBoard();
-        this.randomizeFixedTiles(1); // Start with 2 fixed tiles
-        this.shuffleBoard(1000, true);
+        
+        // Get a new puzzle from the generator
+        const puzzle = SlidokuPuzzleGenerator.generatePuzzle();
+        
+        // Set up the game state from the puzzle
+        this.board = puzzle.initialBoard;
+        this.targetState = puzzle.targetBoard;
+        this.fixedTiles = puzzle.fixedTiles;
+        this.emptyTile = puzzle.emptyTile;
+        this.size = puzzle.size;
+        this.targetSum = puzzle.targetSum;
+        
         this.renderBoard();
         this.updateSums();
     }
