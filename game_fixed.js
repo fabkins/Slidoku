@@ -332,9 +332,18 @@ class SlidokuGame {
 
 
 
-    shuffleBoard(moves = 1000, dontshuffleOneEdge = false) {
-        console.log(`Shuffling board with ${moves} random moves...`);
+    shuffleBoard(moves = 1000, dontShuffleOneEdge = false) {
+        console.log(`Shuffling board with ${moves} random moves... ${dontShuffleOneEdge ? 'One edge preserved' : ''}`);
         let lastMoved = null; // Keep track of the last tile we moved
+        
+        // Determine which edge to preserve (the one without the empty tile)
+        let edgeToPreserve = null;
+        if (dontShuffleOneEdge) {
+            if (this.emptyTile.row !== 0) edgeToPreserve = 0; // preserve top edge
+            else if (this.emptyTile.row !== this.size - 1) edgeToPreserve = this.size - 1; // preserve bottom edge
+            else if (this.emptyTile.col !== 0) edgeToPreserve = -1; // preserve left edge (-1 means left)
+            else edgeToPreserve = -2; // preserve right edge (-2 means right)
+        }
 
         for (let i = 0; i < moves; i++) {
             const { row, col } = this.emptyTile;
@@ -349,6 +358,17 @@ class SlidokuGame {
             // Filter out any fixed tiles (cannot be moved)
             neighbors = neighbors.filter(([r, c]) =>
                 !this.fixedTiles.some(fixed => fixed.row === r && fixed.col === c));
+
+            // If dontShuffleOneEdge is true, don't allow moving tiles from the preserved edge
+            if (dontShuffleOneEdge && edgeToPreserve !== null) {
+                if (edgeToPreserve >= 0) { // top or bottom edge
+                    neighbors = neighbors.filter(([r, c]) => r !== edgeToPreserve);
+                } else if (edgeToPreserve === -1) { // left edge
+                    neighbors = neighbors.filter(([r, c]) => c !== 0);
+                } else { // right edge
+                    neighbors = neighbors.filter(([r, c]) => c !== this.size - 1);
+                }
+            }
 
             // Filter out the last moved tile if we have other options
             if (lastMoved && neighbors.length > 1) {
