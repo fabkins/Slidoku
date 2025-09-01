@@ -215,6 +215,9 @@ h1 {
     position: relative;
     box-shadow: 0 4px 20px rgba(0,0,0,0.2);
     animation: slideIn 0.3s ease-out;
+    max-height: 80vh; /* Limit height and enable scrolling */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
 @keyframes slideIn {
@@ -483,7 +486,43 @@ h1 {
         width: 95%;
         padding: 15px;
         margin: 15% auto;
+        max-height: 80vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
     }
+    
+    #instructionsModal .modal-content {
+        padding: 12px;
+    }
+    
+    #instructionsModal h2 {
+        font-size: 1.3em;
+        margin-bottom: 12px;
+    }
+    
+    #instructionsModal p {
+        font-size: 0.9em;
+        margin-bottom: 10px;
+        line-height: 1.4;
+    }
+    
+/* Extra small devices */
+@media (max-width: 375px) {
+    #instructionsModal p {
+        font-size: 0.85em;
+        padding: 0 5px;
+        margin-bottom: 8px;
+    }
+    
+    #instructionsModal h2 {
+        font-size: 1.2em;
+        margin-bottom: 10px;
+    }
+    
+    .modal-content {
+        padding: 12px 10px;
+    }
+}
 
     #storageInfo {
         background-color: white;
