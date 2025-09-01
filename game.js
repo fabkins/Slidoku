@@ -37,7 +37,6 @@ class SlidokiGame {
             this.initializeGame(today, "Medium");
             this.setupEventListeners();
             this.setupModal();
-            this.setupDebugButton(); // Set up the debug cookies button explicitly
             console.log('Initialization complete');
         } catch (error) {
             console.error('Error during initialization:', error);
@@ -691,8 +690,6 @@ class SlidokiGame {
         } else {
             console.error('New game button not found');
         }
-
-        // Debug button is now set up in a separate method: setupDebugButton()
     }
 
     // Score storage management (cookies with localStorage fallback)
@@ -853,71 +850,7 @@ class SlidokiGame {
         }
     }
     
-    setupDebugButton() {
-        console.log('Setting up debug cookies button...');
-        const debugCookiesButton = document.getElementById('debugCookies');
-        
-        if (!debugCookiesButton) {
-            console.error('Debug cookies button not found in the DOM');
-            return;
-        }
-        
-        console.log('Debug cookies button found, attaching click event');
-        
-        // Remove any existing event listeners (in case this is called multiple times)
-        debugCookiesButton.replaceWith(debugCookiesButton.cloneNode(true));
-        
-        // Get the fresh button reference after replacement
-        const freshButton = document.getElementById('debugCookies');
-        
-        // Add explicit click event with alert for visibility
-        freshButton.onclick = () => {
-            console.log('--- DEBUG COOKIES BUTTON CLICKED ---');
-            alert('Checking cookies... See console for details.');
-            
-            console.log('All cookies:', document.cookie);
-            
-            const cookies = document.cookie.split(';');
-            if (cookies.length === 0 || (cookies.length === 1 && cookies[0].trim() === '')) {
-                console.log('No cookies found');
-                alert('No cookies found');
-            } else {
-                console.log(`Found ${cookies.length} cookies:`);
-                let cookiesList = `Found ${cookies.length} cookies:\n`;
-                
-                cookies.forEach((cookie, index) => {
-                    cookie = cookie.trim();
-                    console.log(`${index + 1}. ${cookie}`);
-                    cookiesList += `${index + 1}. ${cookie}\n`;
-                });
-                
-                alert(cookiesList);
-            }
-
-            // Test setting a simple cookie
-            const testKey = 'slidoki_test_cookie';
-            const testValue = 'test_value_' + new Date().getTime();
-            document.cookie = `${testKey}=${testValue}; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/`;
-            console.log(`Test cookie set: ${testKey}=${testValue}`);
-            console.log('All cookies now:', document.cookie);
-            
-            // Check if browser accepts cookies
-            if (navigator.cookieEnabled) {
-                console.log('Browser cookie support: ENABLED');
-            } else {
-                console.log('Browser cookie support: DISABLED');
-                alert('WARNING: Browser cookie support is DISABLED');
-            }
-        };
-        
-        // Make button more visible for debugging
-        freshButton.style.backgroundColor = '#ff5722';
-        freshButton.style.color = 'white';
-        freshButton.style.fontWeight = 'bold';
-        
-        console.log('Debug cookies button setup complete');
-    }
-
+    
     // Add a diagonal "COMPLETED" banner across the game board
     addCompletedBanner() {
         // Remove any existing banner first
