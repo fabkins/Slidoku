@@ -34,7 +34,7 @@ class SlidokiGame {
             this.testCookieSupport(); // Test cookie functionality first
             
             const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
-            this.initializeGame(today, "Medium");
+            this.initializeGame(today, "Easy");
             this.setupEventListeners();
             this.setupModal();
             console.log('Initialization complete');
@@ -684,8 +684,8 @@ class SlidokiGame {
                 console.log('New game clicked');
                 // Get today's date in YYYY-MM-DD format
                 const today = new Date().toISOString().split('T')[0];
-                // Use the default Medium difficulty
-                this.initializeGame(today, "Medium");
+                // Use the default Easy difficulty
+                this.initializeGame(today, "Easy");
             });
         } else {
             console.error('New game button not found');
