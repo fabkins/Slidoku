@@ -100,7 +100,7 @@ class SlidokuGame {
         this.resetGame();
 
         // Get a new puzzle from the generator
-        const puzzle = SlidokuPuzzleGenerator.generatePuzzle("placeholder", "Hard" );
+        const puzzle = SlidokuPuzzleGenerator.generatePuzzle("placeholder", "Easy" );
 
         // Set up the game state from the puzzle
         this.board = puzzle.initialBoard;
