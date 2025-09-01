@@ -492,7 +492,7 @@ class SlidokuGame {
         );
     }
 
-    swapTiles(row1, col1, row2, col2, PcheckWin = true) {
+    async swapTiles(row1, col1, row2, col2, PcheckWin = true) {
         console.log('Attempting to swap tiles:', row1, col1, 'with', row2, col2);
         if (this.isAdjacent(row1, col1, row2, col2)) {
             // Don't allow moving any fixed tile
@@ -511,7 +511,49 @@ class SlidokuGame {
             // Increment move counter
             this.moves++;
 
-            // Swap the values
+            // Get the tile elements
+            const tile1 = document.querySelector(`.tile[data-row="${row1}"][data-col="${col1}"]`);
+            const tile2 = document.querySelector(`.tile[data-row="${row2}"][data-col="${col2}"]`);
+
+            // Only animate if PcheckWin is true (during gameplay, not shuffling)
+            if (PcheckWin && tile1 && tile2) {
+                const gameBoard = document.querySelector('.game-board');
+                const gridGap = 5; // matches CSS grid-gap
+                const tileSize = 80; // matches CSS tile width/height
+
+                // Clone the tile for animation
+                const clone = tile1.cloneNode(true);
+                clone.classList.add('sliding');
+                
+                // Calculate the starting position
+                const startX = col1 * (tileSize + gridGap);
+                const startY = row1 * (tileSize + gridGap);
+                
+                // Calculate the ending position
+                const endX = col2 * (tileSize + gridGap);
+                const endY = row2 * (tileSize + gridGap);
+                
+                // Position the clone absolutely
+                clone.style.position = 'absolute';
+                clone.style.left = `${startX}px`;
+                clone.style.top = `${startY}px`;
+                clone.style.margin = '0';
+                clone.style.zIndex = '1000';
+                
+                // Add the clone to the game board
+                gameBoard.appendChild(clone);
+                
+                // Start the animation
+                requestAnimationFrame(() => {
+                    clone.style.transform = `translate(${endX - startX}px, ${endY - startY}px)`;
+                });
+
+                // Wait for animation to complete and remove clone
+                await new Promise(resolve => setTimeout(resolve, 200));
+                clone.remove();
+            }
+
+            // Swap the values in the board array
             [this.board[row1][col1], this.board[row2][col2]] =
                 [this.board[row2][col2], this.board[row1][col1]];
 
@@ -735,11 +777,14 @@ class SlidokuGame {
                 let currentEmptyRow = this.emptyTile.row;
                 let currentEmptyCol = this.emptyTile.col;
                 
-                tilesToMove.forEach(({ row, col }) => {
-                    this.swapTiles(row, col, currentEmptyRow, currentEmptyCol);
-                    currentEmptyRow = row;
-                    currentEmptyCol = col;
-                });
+                // Use async/await to handle sequential animations
+                (async () => {
+                    for (const { row, col } of tilesToMove) {
+                        await this.swapTiles(row, col, currentEmptyRow, currentEmptyCol);
+                        currentEmptyRow = row;
+                        currentEmptyCol = col;
+                    }
+                })();
             }
         });
 
