@@ -50,6 +50,11 @@ h1 {
     color: #ccc;
 }
 
+#bestScore {
+    font-weight: bold;
+    color: #4CAF50;
+}
+
 .game-buttons {
     display: flex;
     gap: 10px;

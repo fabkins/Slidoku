@@ -9,6 +9,13 @@ class SlidokuGame {
         this.moves = 0;
         this.startTime = null;
         this.timer = null;
+        this.currentDate = null;
+        this.currentDifficulty = null;
+        this.bestScore = null;
+        
+        // Initialize storage availability flags
+        this.cookiesAvailable = false;
+        this.localStorageAvailable = false;
 
         // Ensure DOM is loaded before proceeding
         if (document.readyState === 'loading') {
@@ -23,13 +30,103 @@ class SlidokuGame {
     init() {
         console.log('Running init...');
         try {
+            this.testCookieSupport(); // Test cookie functionality first
+            
             const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
             this.initializeGame(today, "Medium");
             this.setupEventListeners();
             this.setupModal();
+            this.setupDebugButton(); // Set up the debug cookies button explicitly
             console.log('Initialization complete');
         } catch (error) {
             console.error('Error during initialization:', error);
+        }
+    }
+    
+    testCookieSupport() {
+        console.log('Testing cookie support...');
+        this.cookiesAvailable = false;
+        this.localStorageAvailable = false;
+        
+        // Test localStorage availability first
+        try {
+            localStorage.setItem('slidoku_ls_test', 'test');
+            const testValue = localStorage.getItem('slidoku_ls_test');
+            if (testValue === 'test') {
+                console.log('localStorage is available');
+                this.localStorageAvailable = true;
+                localStorage.removeItem('slidoku_ls_test');
+            }
+        } catch (e) {
+            console.error('localStorage not available:', e);
+        }
+        
+        // Now test cookies
+        if (!navigator.cookieEnabled) {
+            console.error('CRITICAL: Browser cookies are disabled!');
+            this.showStorageWarning('cookies');
+        } else {
+            // Try setting a test cookie
+            const testKey = 'slidoku_init_test';
+            const testValue = 'init_' + Date.now();
+            const expires = 'expires=Fri, 31 Dec 9999 23:59:59 GMT';
+            
+            try {
+                document.cookie = `${testKey}=${testValue}; ${expires}; path=/`;
+                console.log(`Test cookie set: ${testKey}=${testValue}`);
+                
+                // Try to read back the cookie immediately
+                const allCookies = document.cookie;
+                console.log('All cookies:', allCookies);
+                
+                if (allCookies.indexOf(testKey) !== -1) {
+                    console.log('Cookie test passed: Cookie support is working');
+                    this.cookiesAvailable = true;
+                    return true;
+                } else {
+                    console.error('Could not retrieve the test cookie!');
+                    this.showStorageWarning('cookies');
+                }
+            } catch (e) {
+                console.error('Error testing cookies:', e);
+                this.showStorageWarning('cookies');
+            }
+        }
+        
+        // If we got here, cookies failed but localStorage might be available
+        if (this.localStorageAvailable) {
+            console.log('Using localStorage as fallback for score storage');
+            this.showStorageWarning('cookiesFallback');
+            return true;
+        }
+        
+        // Both cookies and localStorage failed
+        this.showStorageWarning('all');
+        return false;
+    }
+    
+    showStorageWarning(type) {
+        // Create a warning element if it doesn't exist
+        let warningEl = document.getElementById('storageWarning');
+        if (!warningEl) {
+            warningEl = document.createElement('div');
+            warningEl.id = 'storageWarning';
+            warningEl.style.cssText = 'background-color: #ff5722; color: white; padding: 8px; margin-top: 10px; border-radius: 5px; font-size: 14px; text-align: center;';
+            
+            // Find a spot to insert it (after the game-info div)
+            const gameInfo = document.querySelector('.game-info');
+            if (gameInfo && gameInfo.parentNode) {
+                gameInfo.parentNode.insertBefore(warningEl, gameInfo.nextSibling);
+            }
+        }
+        
+        // Set the message based on the type of warning
+        if (type === 'cookies') {
+            warningEl.innerHTML = '⚠️ Your browser is blocking cookies. Best scores cannot be saved.';
+        } else if (type === 'cookiesFallback') {
+            warningEl.innerHTML = '⚠️ Using localStorage instead of cookies. Best scores will only be saved in this browser.';
+        } else if (type === 'all') {
+            warningEl.innerHTML = '⚠️ Your browser is blocking both cookies and localStorage. Best scores cannot be saved.';
         }
     }
 
@@ -127,7 +224,11 @@ class SlidokuGame {
     initializeGame(date = new Date().toISOString().split('T')[0], difficulty = "Medium") {
         console.log('Initializing game with date:', date, 'difficulty:', difficulty);
         this.resetGame();
-
+        
+        // Store current date and difficulty
+        this.currentDate = date;
+        this.currentDifficulty = difficulty;
+        
         // Get a new puzzle from the generator
         const puzzle = SlidokuPuzzleGenerator.generatePuzzle(date, difficulty);
 
@@ -141,6 +242,10 @@ class SlidokuGame {
         this.allowRevealing = puzzle.allowRevealing;
         this.gameDifficulty = puzzle.gameDifficulty;
         this.puzzleNumber = puzzle.puzzleNumber;
+        
+        // Get best score for this puzzle
+        this.bestScore = this.getBestScore(date, difficulty);
+        console.log(`In initializeGame: Best score loaded: ${this.bestScore}`);
 
         // Update reveal button state based on allowRevealing
         const revealButton = document.getElementById('showTarget');
@@ -171,6 +276,7 @@ class SlidokuGame {
 
         this.renderBoard();
         this.updateSums();
+        this.updateBestScoreDisplay();
     }
 
     randomizeFixedTiles(numFixedTiles = 2) {
@@ -208,6 +314,8 @@ class SlidokuGame {
             clearInterval(this.timer);
             this.timer = null;
         }
+        // Update the best score display
+        this.updateBestScoreDisplay();
     }
 
     checkWin() {
@@ -251,6 +359,16 @@ class SlidokuGame {
             min-width: 300px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.2);
         `;
+        
+        // Save the score and check if it's a new best score
+        console.log(`In checkWin: About to set best score for date=${this.currentDate}, difficulty=${this.currentDifficulty}, moves=${this.moves}`);
+        const isNewBestScore = this.setBestScore(this.currentDate, this.currentDifficulty, this.moves);
+        console.log(`In checkWin: Is new best score? ${isNewBestScore}`);
+        console.log(`In checkWin: Current best score is now: ${this.bestScore}`);
+        
+        const bestScoreMessage = isNewBestScore ? 
+            `<p style="font-size: 18px; margin: 15px 0; color: #FF5722; font-weight: bold;">New Best Score!</p>` : 
+            (this.bestScore ? `<p style="font-size: 16px; margin: 15px 0; color: #666;">Best: ${this.bestScore} moves</p>` : '');
 
         content.innerHTML = `
             <h2 style="
@@ -264,6 +382,7 @@ class SlidokuGame {
                 margin: 15px 0;
                 color: #333;
             ">Puzzle completed in ${this.moves} moves</p>
+            ${bestScoreMessage}
             <p style="
                 font-size: 18px;
                 margin: 15px 0;
@@ -541,11 +660,239 @@ class SlidokuGame {
         if (newGameButton) {
             newGameButton.addEventListener('click', () => {
                 console.log('New game clicked');
-                this.initializeGame(true); // Always preserve one edge in new games
+                // Get today's date in YYYY-MM-DD format
+                const today = new Date().toISOString().split('T')[0];
+                // Use the default Medium difficulty
+                this.initializeGame(today, "Medium");
             });
         } else {
             console.error('New game button not found');
         }
+
+        // Debug button is now set up in a separate method: setupDebugButton()
+    }
+
+    // Score storage management (cookies with localStorage fallback)
+    setBestScore(date, difficulty, moves) {
+        if (!date || !difficulty) {
+            console.error('Invalid parameters for setBestScore:', date, difficulty, moves);
+            return false;
+        }
+        
+        // Make sure the key is URL-friendly
+        const safeDate = encodeURIComponent(date);
+        const safeDifficulty = encodeURIComponent(difficulty);
+        const key = `slidoku_score_${safeDate}_${safeDifficulty}`;
+        
+        // Get current best score
+        const currentBest = this.getBestScore(date, difficulty);
+        
+        console.log(`Setting best score - Date: ${date}, Difficulty: ${difficulty}, Moves: ${moves}`);
+        console.log(`Current best score: ${currentBest === null ? 'None' : currentBest}`);
+        
+        // Only update if this is a better score or if no previous score exists
+        if (currentBest === null || moves < currentBest) {
+            let saveSuccessful = false;
+            
+            // Try cookies first if they're available
+            if (this.cookiesAvailable) {
+                try {
+                    // Set the cookie with proper formatting
+                    const expires = new Date();
+                    // Set expiration 10 years in the future
+                    expires.setFullYear(expires.getFullYear() + 10);
+                    
+                    // Properly format the cookie
+                    document.cookie = `${key}=${moves}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
+                    console.log(`Cookie set for key: ${key}, value: ${moves}`);
+                    
+                    // Verify the cookie was set
+                    const cookies = document.cookie;
+                    if (cookies.indexOf(key) !== -1) {
+                        saveSuccessful = true;
+                    }
+                } catch (e) {
+                    console.error('Error setting cookie:', e);
+                }
+            }
+            
+            // If cookies failed or aren't available, try localStorage
+            if (!saveSuccessful && this.localStorageAvailable) {
+                try {
+                    localStorage.setItem(key, moves.toString());
+                    console.log(`Score saved to localStorage: ${key}=${moves}`);
+                    saveSuccessful = true;
+                } catch (e) {
+                    console.error('Error saving to localStorage:', e);
+                }
+            }
+            
+            if (saveSuccessful) {
+                // Update the instance variable
+                this.bestScore = moves;
+                return true; // Score was updated
+            } else {
+                console.error('Failed to save score - both cookies and localStorage failed');
+                return false;
+            }
+        }
+        
+        return false; // Score was not updated (not better than previous best)
+    }
+
+    getBestScore(date, difficulty) {
+        if (!date || !difficulty) {
+            console.error('Invalid parameters for getBestScore:', date, difficulty);
+            return null;
+        }
+        
+        // Make sure the key is URL-friendly
+        const safeDate = encodeURIComponent(date);
+        const safeDifficulty = encodeURIComponent(difficulty);
+        const key = `slidoku_score_${safeDate}_${safeDifficulty}`;
+        
+        console.log(`Getting best score - Date: ${date}, Difficulty: ${difficulty}, key: ${key}`);
+        
+        let score = null;
+        
+        // Try cookies first
+        if (this.cookiesAvailable) {
+            try {
+                // Split all cookies and find our key
+                const cookies = document.cookie.split(';');
+                
+                for (let cookie of cookies) {
+                    cookie = cookie.trim();
+                    
+                    // Check if this cookie matches our key
+                    if (cookie.indexOf(`${key}=`) === 0) {
+                        // Get the value part
+                        const value = cookie.substring(key.length + 1);
+                        // Parse to integer
+                        score = parseInt(value, 10);
+                        
+                        console.log(`Found score in cookie: ${score}`);
+                        
+                        if (isNaN(score)) {
+                            console.warn(`Found cookie but value is not a valid number: ${value}`);
+                            score = null;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('Error reading cookies:', e);
+            }
+        }
+        
+        // If cookie lookup failed, try localStorage
+        if (score === null && this.localStorageAvailable) {
+            try {
+                const value = localStorage.getItem(key);
+                if (value) {
+                    score = parseInt(value, 10);
+                    console.log(`Found score in localStorage: ${score}`);
+                    
+                    if (isNaN(score)) {
+                        console.warn(`Found localStorage item but value is not a valid number: ${value}`);
+                        score = null;
+                    }
+                }
+            } catch (e) {
+                console.error('Error reading from localStorage:', e);
+            }
+        }
+        
+        if (score === null) {
+            console.log(`No score found for key: ${key}`);
+        }
+        
+        return score;
+    }
+
+    updateBestScoreDisplay() {
+        const bestScoreElement = document.getElementById('bestScore');
+        if (!bestScoreElement) {
+            console.log('Best score element not found in the DOM');
+            return;
+        }
+        
+        console.log(`Updating best score display. Current best score: ${this.bestScore}`);
+        console.log(`Current date: ${this.currentDate}, difficulty: ${this.currentDifficulty}`);
+        
+        if (this.bestScore !== null) {
+            bestScoreElement.textContent = this.bestScore + ' moves';
+            console.log(`Displayed best score as: ${this.bestScore} moves`);
+        } else {
+            bestScoreElement.textContent = '-';
+            console.log('Displayed best score as: -');
+        }
+    }
+    
+    setupDebugButton() {
+        console.log('Setting up debug cookies button...');
+        const debugCookiesButton = document.getElementById('debugCookies');
+        
+        if (!debugCookiesButton) {
+            console.error('Debug cookies button not found in the DOM');
+            return;
+        }
+        
+        console.log('Debug cookies button found, attaching click event');
+        
+        // Remove any existing event listeners (in case this is called multiple times)
+        debugCookiesButton.replaceWith(debugCookiesButton.cloneNode(true));
+        
+        // Get the fresh button reference after replacement
+        const freshButton = document.getElementById('debugCookies');
+        
+        // Add explicit click event with alert for visibility
+        freshButton.onclick = () => {
+            console.log('--- DEBUG COOKIES BUTTON CLICKED ---');
+            alert('Checking cookies... See console for details.');
+            
+            console.log('All cookies:', document.cookie);
+            
+            const cookies = document.cookie.split(';');
+            if (cookies.length === 0 || (cookies.length === 1 && cookies[0].trim() === '')) {
+                console.log('No cookies found');
+                alert('No cookies found');
+            } else {
+                console.log(`Found ${cookies.length} cookies:`);
+                let cookiesList = `Found ${cookies.length} cookies:\n`;
+                
+                cookies.forEach((cookie, index) => {
+                    cookie = cookie.trim();
+                    console.log(`${index + 1}. ${cookie}`);
+                    cookiesList += `${index + 1}. ${cookie}\n`;
+                });
+                
+                alert(cookiesList);
+            }
+
+            // Test setting a simple cookie
+            const testKey = 'slidoku_test_cookie';
+            const testValue = 'test_value_' + new Date().getTime();
+            document.cookie = `${testKey}=${testValue}; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/`;
+            console.log(`Test cookie set: ${testKey}=${testValue}`);
+            console.log('All cookies now:', document.cookie);
+            
+            // Check if browser accepts cookies
+            if (navigator.cookieEnabled) {
+                console.log('Browser cookie support: ENABLED');
+            } else {
+                console.log('Browser cookie support: DISABLED');
+                alert('WARNING: Browser cookie support is DISABLED');
+            }
+        };
+        
+        // Make button more visible for debugging
+        freshButton.style.backgroundColor = '#ff5722';
+        freshButton.style.color = 'white';
+        freshButton.style.fontWeight = 'bold';
+        
+        console.log('Debug cookies button setup complete');
     }
 
     renderTargetBoard() {
