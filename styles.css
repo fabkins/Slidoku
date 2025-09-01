@@ -19,6 +19,8 @@ body {
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    min-width: 550px; /* Increase the minimum width to fit all buttons */
+    max-width: 95%;   /* Ensure it doesn't get too wide on large screens */
 }
 
 h1 {
@@ -67,7 +69,6 @@ h1 {
     color: #666;
     text-align: center;
 }
-}
 
 .game-buttons {
     display: flex;
@@ -76,14 +77,14 @@ h1 {
 }
 
 .game-buttons button {
-    padding: 10px 20px;
+    padding: 10px 15px;
     font-size: 1em;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     display: inline-block;
-    margin: 0 5px;
+    margin: 0 3px;
 }
 
 #newGame {
@@ -98,19 +99,17 @@ h1 {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 20px 0;
+    margin: 20px auto;
+    width: fit-content;
 }
 
 .game-board {
     position: relative;
     overflow: hidden; /* Ensures banner doesn't overflow */
-}
-
-.game-board {
     display: grid;
     grid-template-columns: repeat(4, 80px);
     grid-gap: 5px;
-    position: relative;  /* Add this for absolute positioning context */
+    /* Add this for absolute positioning context */
 }
 
 .tile {
@@ -351,11 +350,19 @@ h1 {
     font-size: 12px;  /* Matched to column sums */
 }
 
+.column-sums-container {
+    display: flex;
+    justify-content: flex-start;
+    width: fit-content;
+    margin: 0 auto;
+}
+
 .column-sums {
     display: grid;
     grid-template-columns: repeat(4, 80px);
     grid-gap: 5px;
     margin: 10px 0;
+    margin-left: 0; /* Align with game board */
 }
 
 .column-sums div {
