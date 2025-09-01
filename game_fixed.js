@@ -34,29 +34,53 @@ class SlidokuGame {
     }
 
     setupModal() {
-        console.log('Setting up modal...');
-        const modal = document.getElementById('targetModal');
-        const btn = document.getElementById('showTarget');
-        const span = document.getElementsByClassName('close')[0];
+        console.log('Setting up modals...');
+        // Setup target modal
+        const targetModal = document.getElementById('targetModal');
+        const targetBtn = document.getElementById('showTarget');
+        const targetSpan = targetModal.querySelector('.close');
 
-        if (!modal || !btn || !span) {
-            console.error('Modal elements not found');
+        if (!targetModal || !targetBtn || !targetSpan) {
+            console.error('Target modal elements not found');
             return;
         }
 
-        btn.onclick = () => {
+        targetBtn.onclick = () => {
             console.log('Show target clicked');
             this.renderTargetBoard();
-            modal.style.display = 'block';
+            targetModal.style.display = 'block';
         };
 
-        span.onclick = () => {
-            modal.style.display = 'none';
+        targetSpan.onclick = () => {
+            targetModal.style.display = 'none';
         };
 
+        // Setup instructions modal
+        const instructionsModal = document.getElementById('instructionsModal');
+        const instructionsBtn = document.getElementById('showInstructions');
+        const instructionsSpan = instructionsModal.querySelector('.close');
+
+        if (!instructionsModal || !instructionsBtn || !instructionsSpan) {
+            console.error('Instructions modal elements not found');
+            return;
+        }
+
+        instructionsBtn.onclick = () => {
+            console.log('Show instructions clicked');
+            instructionsModal.style.display = 'block';
+        };
+
+        instructionsSpan.onclick = () => {
+            instructionsModal.style.display = 'none';
+        };
+
+        // Close modals when clicking outside
         window.onclick = (event) => {
-            if (event.target === modal) {
-                modal.style.display = 'none';
+            if (event.target === targetModal) {
+                targetModal.style.display = 'none';
+            }
+            if (event.target === instructionsModal) {
+                instructionsModal.style.display = 'none';
             }
         };
     }
