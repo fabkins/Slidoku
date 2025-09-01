@@ -666,6 +666,53 @@ class SlidokuGame {
         return null;
     }
 
+    getMovableTiles(clickedRow, clickedCol) {
+        const tiles = [];
+        const { row: emptyRow, col: emptyCol } = this.emptyTile;
+
+        // If not in same row or column as empty tile, return empty array
+        if (clickedRow !== emptyRow && clickedCol !== emptyCol) {
+            return tiles;
+        }
+
+        if (clickedRow === emptyRow) {
+            // Moving horizontally
+            const start = Math.min(clickedCol, emptyCol);
+            const end = Math.max(clickedCol, emptyCol);
+            
+            // Check for fixed tiles in between
+            for (let col = start; col <= end; col++) {
+                if (this.fixedTiles.some(fixed => fixed.row === clickedRow && fixed.col === col)) {
+                    return []; // Fixed tile blocks the movement
+                }
+                if (col !== emptyCol) {
+                    tiles.push({ row: clickedRow, col: col });
+                }
+            }
+        } else if (clickedCol === emptyCol) {
+            // Moving vertically
+            const start = Math.min(clickedRow, emptyRow);
+            const end = Math.max(clickedRow, emptyRow);
+            
+            // Check for fixed tiles in between
+            for (let row = start; row <= end; row++) {
+                if (this.fixedTiles.some(fixed => fixed.row === row && fixed.col === clickedCol)) {
+                    return []; // Fixed tile blocks the movement
+                }
+                if (row !== emptyRow) {
+                    tiles.push({ row: row, col: clickedCol });
+                }
+            }
+        }
+
+        // Sort tiles based on distance to empty space - closest first
+        return tiles.sort((a, b) => {
+            const distA = Math.abs(a.row - emptyRow) + Math.abs(a.col - emptyCol);
+            const distB = Math.abs(b.row - emptyRow) + Math.abs(b.col - emptyCol);
+            return distA - distB; // Sort by distance to empty tile
+        });
+    }
+
     setupEventListeners() {
         const gameBoard = document.querySelector('.game-board');
         if (!gameBoard) {
@@ -677,9 +724,23 @@ class SlidokuGame {
             const tile = e.target.closest('.tile');
             if (!tile) return;
 
-            const row = parseInt(tile.dataset.row);
-            const col = parseInt(tile.dataset.col);
-            this.swapTiles(row, col, this.emptyTile.row, this.emptyTile.col);
+            const clickedRow = parseInt(tile.dataset.row);
+            const clickedCol = parseInt(tile.dataset.col);
+            
+            // Get all tiles that need to move
+            const tilesToMove = this.getMovableTiles(clickedRow, clickedCol);
+            
+            if (tilesToMove.length > 0) {
+                // Move tiles one by one towards the empty space
+                let currentEmptyRow = this.emptyTile.row;
+                let currentEmptyCol = this.emptyTile.col;
+                
+                tilesToMove.forEach(({ row, col }) => {
+                    this.swapTiles(row, col, currentEmptyRow, currentEmptyCol);
+                    currentEmptyRow = row;
+                    currentEmptyCol = col;
+                });
+            }
         });
 
         const newGameButton = document.getElementById('newGame');
