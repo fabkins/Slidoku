@@ -73,8 +73,8 @@ class SlidokuGame {
         this.resetGame();
         this.fixedTiles = []; // Initialize empty array first
         this.generateBoard();
-        this.randomizeFixedTiles(2); // Start with 2 fixed tiles
-        this.shuffleBoard();
+        this.randomizeFixedTiles(1); // Start with 2 fixed tiles
+        this.shuffleBoard(1000,true);
         this.renderBoard();
         this.updateSums();
     }
@@ -332,7 +332,7 @@ class SlidokuGame {
 
 
 
-    shuffleBoard(moves = 1000) {
+    shuffleBoard(moves = 1000, dontshuffleOneEdge=false) {
         console.log(`Shuffling board with ${moves} random moves...`);
         let lastMoved = null; // Keep track of the last tile we moved
 
