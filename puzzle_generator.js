@@ -36,7 +36,7 @@ class SeededRandom {
     }
 }
 
-class SlidokuPuzzleGenerator {
+class SlidokiPuzzleGenerator {
     static generatePuzzle(date, difficulty) {
         // Create a deterministic seed from date and difficulty
         const seed = `${date}-${difficulty}`;
@@ -66,7 +66,7 @@ class SlidokuPuzzleGenerator {
         const size = 4;
         const board = this.generateBoard(size);
         const fixedTiles = this.randomizeFixedTiles(board, options.numberOfFixedTiles);
-        const shuffledBoard = this.shuffleBoard(board, fixedTiles, 2, options.dontShuffleOneEdge);
+        const shuffledBoard = this.shuffleBoard(board, fixedTiles, 300, options.dontShuffleOneEdge);
 
         // Create the puzzle object
         return {
@@ -270,10 +270,10 @@ class SlidokuPuzzleGenerator {
 
 // For browser
 if (typeof window !== 'undefined') {
-    window.SlidokuPuzzleGenerator = SlidokuPuzzleGenerator;
+    window.SlidokiPuzzleGenerator = SlidokiPuzzleGenerator;
 }
 
 // For Node.js
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = SlidokuPuzzleGenerator;
+    module.exports = SlidokiPuzzleGenerator;
 }

@@ -1,6 +1,6 @@
-class SlidokuGame {
+class SlidokiGame {
     constructor() {
-        console.log('Initializing SlidokuGame...');
+        console.log('Initializing SlidokiGame...');
         this.board = [];
         this.size = 4;
         this.emptyTile = { row: 3, col: 3 }; // Position of empty tile
@@ -51,12 +51,12 @@ class SlidokuGame {
         
         // Test localStorage availability first
         try {
-            localStorage.setItem('slidoku_ls_test', 'test');
-            const testValue = localStorage.getItem('slidoku_ls_test');
+            localStorage.setItem('slidoki_ls_test', 'test');
+            const testValue = localStorage.getItem('slidoki_ls_test');
             if (testValue === 'test') {
                 console.log('localStorage is available');
                 this.localStorageAvailable = true;
-                localStorage.removeItem('slidoku_ls_test');
+                localStorage.removeItem('slidoki_ls_test');
             }
         } catch (e) {
             console.error('localStorage not available:', e);
@@ -68,7 +68,7 @@ class SlidokuGame {
             this.showStorageWarning('cookies');
         } else {
             // Try setting a test cookie
-            const testKey = 'slidoku_init_test';
+            const testKey = 'slidoki_init_test';
             const testValue = 'init_' + Date.now();
             const expires = 'expires=Fri, 31 Dec 9999 23:59:59 GMT';
             
@@ -229,7 +229,7 @@ class SlidokuGame {
         this.currentDifficulty = difficulty;
         
         // Get a new puzzle from the generator
-        const puzzle = SlidokuPuzzleGenerator.generatePuzzle(date, difficulty);
+        const puzzle = SlidokiPuzzleGenerator.generatePuzzle(date, difficulty);
 
         // Set up the game state from the puzzle
         this.board = puzzle.initialBoard;
@@ -705,7 +705,7 @@ class SlidokuGame {
         // Make sure the key is URL-friendly
         const safeDate = encodeURIComponent(date);
         const safeDifficulty = encodeURIComponent(difficulty);
-        const key = `slidoku_score_${safeDate}_${safeDifficulty}`;
+        const key = `slidoki_score_${safeDate}_${safeDifficulty}`;
         
         // Get current best score
         const currentBest = this.getBestScore(date, difficulty);
@@ -772,7 +772,7 @@ class SlidokuGame {
         // Make sure the key is URL-friendly
         const safeDate = encodeURIComponent(date);
         const safeDifficulty = encodeURIComponent(difficulty);
-        const key = `slidoku_score_${safeDate}_${safeDifficulty}`;
+        const key = `slidoki_score_${safeDate}_${safeDifficulty}`;
         
         console.log(`Getting best score - Date: ${date}, Difficulty: ${difficulty}, key: ${key}`);
         
@@ -895,7 +895,7 @@ class SlidokuGame {
             }
 
             // Test setting a simple cookie
-            const testKey = 'slidoku_test_cookie';
+            const testKey = 'slidoki_test_cookie';
             const testValue = 'test_value_' + new Date().getTime();
             document.cookie = `${testKey}=${testValue}; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/`;
             console.log(`Test cookie set: ${testKey}=${testValue}`);
@@ -1015,7 +1015,7 @@ let game;
 window.addEventListener('DOMContentLoaded', () => {
     console.log('DOMContentLoaded event fired');
     try {
-        game = new SlidokuGame();
+        game = new SlidokiGame();
     } catch (error) {
         console.error('Error creating game:', error);
     }
