@@ -202,6 +202,45 @@ h1 {
     background-color: #6a4a94;
 }
 
+#showInstructions {
+    background-color: #2196F3;
+    font-size: 1.2em;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#showInstructions:hover {
+    background-color: #1976D2;
+}
+
+/* Instructions modal specific styles */
+#instructionsModal .modal-content {
+    text-align: left;
+    line-height: 1.6;
+}
+
+#instructionsModal h2 {
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+#instructionsModal p {
+    margin-bottom: 15px;
+    color: #555;
+    font-size: 1.1em;
+    padding: 0 10px;
+}
+
+
+#showTarget:hover {
+    background-color: #6a4a94;
+}
+
 .row-sums {
     display: grid;
     grid-template-rows: repeat(4, 80px);
