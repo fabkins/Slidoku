@@ -1,10 +1,29 @@
 class SlidokuPuzzleGenerator {
-    static generatePuzzle(options = {dontShuffleOneEdge: false, numberOfFixedTiles: 2, allowRevealing: false}) {
+    static generatePuzzle(date, difficulty) {
+        const options = { dontShuffleOneEdge: false, numberOfFixedTiles: 2, allowRevealing: true }
+        switch (difficulty) {
+            case "Easy":
+                options.numberOfFixedTiles = 1;
+                options.allowRevealing = true;
+                options.dontShuffleOneEdge = false;
+                break;
+            case "Medium":
+                options.numberOfFixedTiles = 1;
+                options.allowRevealing = false;
+                options.dontShuffleOneEdge = true;
+
+                break;
+            case "Hard":
+                options.numberOfFixedTiles = 2;
+                options.allowRevealing = false;
+                options.dontShuffleOneEdge = false;
+                break;
+        }
         const size = 4;
         const board = this.generateBoard(size);
         const fixedTiles = this.randomizeFixedTiles(board, options.numberOfFixedTiles);
         const shuffledBoard = this.shuffleBoard(board, fixedTiles, 1000, options.dontShuffleOneEdge);
-        
+
         // Create the puzzle object
         return {
             size: size,
@@ -145,7 +164,7 @@ class SlidokuPuzzleGenerator {
         let emptyTile = { ...boardState.emptyTile };
 
         // Helper function to check if a tile is fixed
-        const isFixed = (row, col) => 
+        const isFixed = (row, col) =>
             fixedTiles.some(tile => tile.row === row && tile.col === col);
 
         // Determine which edge to preserve (the one without the empty tile)
