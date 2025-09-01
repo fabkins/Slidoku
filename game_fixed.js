@@ -106,6 +106,7 @@ class SlidokuGame {
         this.emptyTile = puzzle.emptyTile;
         this.size = puzzle.size;
         this.targetSum = puzzle.targetSum;
+        this.allowRevealing = puzzle.allowRevealing;
 
         this.renderBoard();
         this.updateSums();
