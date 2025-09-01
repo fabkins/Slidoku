@@ -4,6 +4,14 @@
     box-sizing: border-box;
 }
 
+html, body {
+    height: 100%;
+    height: calc(var(--vh, 1vh) * 100); /* Use custom viewport height calculation */
+    width: 100%;
+    overflow: hidden; /* Prevent scrolling */
+    position: fixed;
+}
+
 body {
     font-family: Arial, sans-serif;
     display: flex;
@@ -11,6 +19,7 @@ body {
     align-items: center;
     min-height: 100vh;
     background-color: #f0f0f0;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); /* Handle notches and safe areas */
 }
 
 .container {
@@ -394,20 +403,31 @@ h1 {
 
 /* Mobile-specific styles */
 @media (max-width: 768px) {
+    html {
+        background-color: white;
+    }
+    
     body {
         padding: 0;
         margin: 0;
         background-color: white; /* Change background to white */
         min-height: 100vh;
+        padding: 0; /* Override default padding */
     }
     
     .container {
         min-width: 100%;
         max-width: 100%;
+        width: 100%;
+        height: 100%;
         border-radius: 0;
         box-shadow: none;
         padding: 10px;
         min-height: 100vh; /* Make container take full height */
+        margin: 0;
+        position: absolute;
+        top: 0;
+        left: 0;
     }
     
     .game-buttons {
@@ -443,13 +463,19 @@ h1 {
 
 /* Small mobile devices */
 @media (max-width: 480px) {
-    body {
+    html, body {
         background-color: white;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
     }
     
     .container {
         min-height: 100vh;
         padding: 5px;
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
     }
     
     .game-board {
@@ -498,5 +524,52 @@ h1 {
         background-color: white;
         border-top: none;
         padding-bottom: env(safe-area-inset-bottom, 8px); /* Support for newer devices with notches */
+    }
+}
+
+/* iPhone-specific fixes */
+@media only screen 
+    and (device-width: 390px) 
+    and (device-height: 844px) 
+    and (-webkit-device-pixel-ratio: 3),
+    /* iPhone 13 Pro, iPhone 14 Pro */
+    only screen 
+    and (device-width: 428px) 
+    and (device-height: 926px) 
+    and (-webkit-device-pixel-ratio: 3),
+    /* iPhone 13 Pro Max, iPhone 14 Pro Max */
+    only screen 
+    and (device-width: 430px) 
+    and (device-height: 932px) 
+    and (-webkit-device-pixel-ratio: 3),
+    /* iPhone 15 Pro, iPhone 16 Pro */
+    only screen 
+    and (device-width: 393px) 
+    and (device-height: 852px) 
+    and (-webkit-device-pixel-ratio: 3) {
+    
+    html, body {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-color: white;
+    }
+    
+    body {
+        padding: 0;
+    }
+    
+    .container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        border-radius: 0;
+        box-shadow: none;
     }
 }
