@@ -34,6 +34,39 @@ class SlidokuGame {
 
     setupModal() {
         console.log('Setting up modals...');
+
+        // Setup new game modal
+        const newGameModal = document.getElementById('newGameModal');
+        const newGameBtn = document.getElementById('newGame');
+        const newGameSpan = newGameModal.querySelector('.close');
+        const startNewGameBtn = document.getElementById('startNewGame');
+        const gameDateInput = document.getElementById('gameDate');
+        const difficultySelect = document.getElementById('gameDifficultySelect');
+
+        // Set up date restrictions
+        const today = new Date().toISOString().split('T')[0];
+        const minDate = '2025-08-01';
+        gameDateInput.setAttribute('max', today);
+        gameDateInput.setAttribute('min', minDate);
+        gameDateInput.value = today;
+
+        if (newGameModal && newGameBtn && newGameSpan) {
+            newGameBtn.onclick = () => {
+                newGameModal.style.display = 'block';
+            };
+
+            newGameSpan.onclick = () => {
+                newGameModal.style.display = 'none';
+            };
+
+            startNewGameBtn.onclick = () => {
+                const selectedDate = gameDateInput.value;
+                const selectedDifficulty = difficultySelect.value;
+                this.initializeGame(selectedDate, selectedDifficulty);
+                newGameModal.style.display = 'none';
+            };
+        }
+
         // Setup target modal
         const targetModal = document.getElementById('targetModal');
         const targetBtn = document.getElementById('showTarget');
@@ -84,15 +117,18 @@ class SlidokuGame {
             if (event.target === instructionsModal) {
                 instructionsModal.style.display = 'none';
             }
+            if (event.target === newGameModal) {
+                newGameModal.style.display = 'none';
+            }
         };
     }
 
-    initializeGame() {
-        console.log('Initializing game...');
+    initializeGame(date = new Date().toISOString().split('T')[0], difficulty = "Medium") {
+        console.log('Initializing game with date:', date, 'difficulty:', difficulty);
         this.resetGame();
 
         // Get a new puzzle from the generator
-        const puzzle = SlidokuPuzzleGenerator.generatePuzzle("2025-09-01", "Medium" );
+        const puzzle = SlidokuPuzzleGenerator.generatePuzzle(date, difficulty);
 
         // Set up the game state from the puzzle
         this.board = puzzle.initialBoard;

@@ -43,6 +43,29 @@
             </div>
         </div>
 
+        <!-- Modal for new game options -->
+        <div id="newGameModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>New Game Options</h2>
+                <div class="game-options">
+                    <div class="option-group">
+                        <label for="gameDate">Date:</label>
+                        <input type="date" id="gameDate" required>
+                    </div>
+                    <div class="option-group">
+                        <label for="gameDifficultySelect">Difficulty:</label>
+                        <select id="gameDifficultySelect">
+                            <option value="Easy">Easy</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
+                    <button id="startNewGame">Start Game</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Modal for instructions -->
         <div id="instructionsModal" class="modal">
             <div class="modal-content">
