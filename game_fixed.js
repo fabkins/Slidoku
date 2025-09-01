@@ -182,12 +182,6 @@ class SlidokuGame {
                 [3, 13, 14, 0]
             ],        
             [
-                [6, 8, 11, 5],
-                [9, 7, 4, 10],
-                [12, 0, 3, 15],
-                [3, 15, 12, 0]
-            ],
-            [
                 [14, 0, 3, 13],
                 [1, 15, 12, 2],
                 [9, 7, 10, 4],
@@ -198,12 +192,6 @@ class SlidokuGame {
                 [2, 12, 15, 1],
                 [4, 10, 7, 9],
                 [11, 5, 8, 6]
-            ],
-            [
-                [8, 6, 5, 11],
-                [7, 9, 10, 4],
-                [12, 0, 3, 15],
-                [3, 15, 12, 0]
             ],
             [
                 [11, 5, 8, 6],
@@ -233,6 +221,21 @@ class SlidokuGame {
         const isValidMagicSquare = (square) => {
             const size = square.length;
             const magicSum = 30;
+
+            // Check if all numbers 0-15 are present exactly once
+            const numbers = new Set();
+            for (let i = 0; i < size; i++) {
+                for (let j = 0; j < size; j++) {
+                    const num = square[i][j];
+                    // Check if number is in valid range
+                    if (num < 0 || num > 15) return false;
+                    // Check if number is already seen
+                    if (numbers.has(num)) return false;
+                    numbers.add(num);
+                }
+            }
+            // Check if all numbers 0-15 are present
+            if (numbers.size !== 16) return false;
 
             // Check rows
             for (let i = 0; i < size; i++) {
@@ -324,7 +327,7 @@ class SlidokuGame {
 
 
 
-    shuffleBoard(moves = 2) {
+    shuffleBoard(moves = 1000) {
         console.log(`Shuffling board with ${moves} random moves...`);
         let lastMoved = null; // Keep track of the last tile we moved
 
