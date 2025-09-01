@@ -35,6 +35,21 @@ h1 {
     font-size: 1.2em;
 }
 
+.game-meta {
+    font-size: 0.85em;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.meta-label {
+    color: #888;
+}
+
+.meta-separator {
+    margin: 0 8px;
+    color: #ccc;
+}
+
 .game-buttons {
     display: flex;
     gap: 10px;

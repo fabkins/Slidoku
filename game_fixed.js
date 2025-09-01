@@ -23,7 +23,8 @@ class SlidokuGame {
     init() {
         console.log('Running init...');
         try {
-            this.initializeGame(true);
+            const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+            this.initializeGame(today, "Medium");
             this.setupEventListeners();
             this.setupModal();
             console.log('Initialization complete');
@@ -147,14 +148,25 @@ class SlidokuGame {
             revealButton.disabled = !this.allowRevealing;
         }
 
-        // Update difficulty and puzzle number displays
+        // Update difficulty, date, and puzzle number displays
         const difficultySpan = document.getElementById('gameDifficulty');
         const puzzleNumberSpan = document.getElementById('puzzleNumber');
+        const gameDateSpan = document.getElementById('currentGameDate');
+        
         if (difficultySpan) {
             difficultySpan.textContent = this.gameDifficulty;
         }
         if (puzzleNumberSpan) {
             puzzleNumberSpan.textContent = this.puzzleNumber;
+        }
+        if (gameDateSpan) {
+            // Format date as "Sep 1, 2025"
+            const formattedDate = new Date(date).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+            gameDateSpan.textContent = formattedDate;
         }
 
         this.renderBoard();
