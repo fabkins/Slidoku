@@ -92,7 +92,7 @@ class SlidokuGame {
         this.resetGame();
 
         // Get a new puzzle from the generator
-        const puzzle = SlidokuPuzzleGenerator.generatePuzzle("placeholder", "Easy" );
+        const puzzle = SlidokuPuzzleGenerator.generatePuzzle("2025-09-01", "Easy" );
 
         // Set up the game state from the puzzle
         this.board = puzzle.initialBoard;

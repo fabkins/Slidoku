@@ -1,8 +1,50 @@
+class SeededRandom {
+    constructor(seed) {
+        this.seed = this.hash(seed);
+    }
+
+    // Simple string hash function
+    hash(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32-bit integer
+        }
+        return hash;
+    }
+
+    // Generate a random number between 0 and 1
+    random() {
+        const x = Math.sin(this.seed++) * 10000;
+        return x - Math.floor(x);
+    }
+
+    // Generate a random integer between min (inclusive) and max (exclusive)
+    nextInt(min, max) {
+        return Math.floor(this.random() * (max - min) + min);
+    }
+
+    // Shuffle an array using Fisher-Yates algorithm
+    shuffle(array) {
+        const newArray = [...array];
+        for (let i = newArray.length - 1; i > 0; i--) {
+            const j = Math.floor(this.random() * (i + 1));
+            [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+        }
+        return newArray;
+    }
+}
+
 class SlidokuPuzzleGenerator {
     static generatePuzzle(date, difficulty) {
+        // Create a deterministic seed from date and difficulty
+        const seed = `${date}-${difficulty}`;
+        this.rng = new SeededRandom(seed);
+        
         const options = { dontShuffleOneEdge: false, numberOfFixedTiles: 2, allowRevealing: true }
         options.gameDifficulty = difficulty;
-        options.puzzleNumber = Math.floor(Math.random() * 10000); // Random puzzle number
+        options.puzzleNumber = this.rng.nextInt(0, 10000); // Deterministic puzzle number
         switch (difficulty) {
             case "Easy":
                 options.numberOfFixedTiles = 1;
@@ -41,6 +83,7 @@ class SlidokuPuzzleGenerator {
     }
 
     static generateBoard(size) {
+        // Use seeded random number generator for all random operations
         const MAGIC_SEEDS = [
             [
                 [15, 1, 2, 12],
@@ -74,10 +117,11 @@ class SlidokuPuzzleGenerator {
             ]
         ];
 
-        let magicSquare = MAGIC_SEEDS[Math.floor(Math.random() * MAGIC_SEEDS.length)]
+        // Use seeded random number generator to select magic square
+        let magicSquare = MAGIC_SEEDS[this.rng.nextInt(0, MAGIC_SEEDS.length)]
             .map(row => [...row]);
 
-        // Apply random transformations
+        // Apply random transformations using seeded RNG
         magicSquare = this.applyRandomTransformations(magicSquare);
 
         // Find empty tile position
@@ -112,28 +156,28 @@ class SlidokuPuzzleGenerator {
 
         const reflectH = (g) => g.map(row => [...row].reverse());
 
-        // Apply random rotations
-        let r = Math.floor(Math.random() * 4);
+        // Apply random rotations using seeded RNG
+        let r = this.rng.nextInt(0, 4);
         for (let i = 0; i < r; i++) {
             grid = rotate90(grid);
         }
 
-        // Random reflection
-        if (Math.random() < 0.5) {
+        // Random reflection using seeded RNG
+        if (this.rng.random() < 0.5) {
             grid = reflectH(grid);
         }
 
-        // Random row swaps (within pairs)
-        if (Math.random() < 0.5) [grid[0], grid[1]] = [grid[1], grid[0]];
-        if (Math.random() < 0.5) [grid[2], grid[3]] = [grid[3], grid[2]];
+        // Random row swaps (within pairs) using seeded RNG
+        if (this.rng.random() < 0.5) [grid[0], grid[1]] = [grid[1], grid[0]];
+        if (this.rng.random() < 0.5) [grid[2], grid[3]] = [grid[3], grid[2]];
 
-        // Random column swaps (within pairs)
-        if (Math.random() < 0.5) {
+        // Random column swaps (within pairs) using seeded RNG
+        if (this.rng.random() < 0.5) {
             for (let i = 0; i < 4; i++) {
                 [grid[i][0], grid[i][1]] = [grid[i][1], grid[i][0]];
             }
         }
-        if (Math.random() < 0.5) {
+        if (this.rng.random() < 0.5) {
             for (let i = 0; i < 4; i++) {
                 [grid[i][2], grid[i][3]] = [grid[i][3], grid[i][2]];
             }
@@ -155,12 +199,9 @@ class SlidokuPuzzleGenerator {
             boardState.board[pos.row][pos.col] !== 0);
 
         const fixedTiles = [];
-        while (fixedTiles.length < numFixedTiles && validPositions.length > 0) {
-            const randomIndex = Math.floor(Math.random() * validPositions.length);
-            fixedTiles.push(validPositions.splice(randomIndex, 1)[0]);
-        }
-
-        return fixedTiles;
+        // Use Fisher-Yates shuffle with seeded RNG to select fixed tiles
+        const shuffledPositions = this.rng.shuffle(validPositions);
+        return shuffledPositions.slice(0, numFixedTiles);
     }
 
     static shuffleBoard(boardState, fixedTiles, moves = 1000, dontShuffleOneEdge = false) {
@@ -216,8 +257,8 @@ class SlidokuPuzzleGenerator {
 
             if (neighbors.length === 0) continue;
 
-            // Perform swap
-            const [r2, c2] = neighbors[Math.floor(Math.random() * neighbors.length)];
+            // Perform swap using seeded RNG
+            const [r2, c2] = neighbors[this.rng.nextInt(0, neighbors.length)];
             lastMoved = [row, col];
             [board[row][col], board[r2][c2]] = [board[r2][c2], board[row][col]];
             emptyTile = { row: r2, col: c2 };
